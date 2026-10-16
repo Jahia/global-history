@@ -1,0 +1,27 @@
+.tableWrapper {
+  position: relative;
+  overflow-x: auto;
+}
+
+/* DataTable rows wrap once the fixed column widths exceed the row, so the table keeps room for the fluid Name and Path columns. */
+.tableWrapper table {
+  min-width: 1600px;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(255 255 255 / 60%);
+}
+
+.secondary {
+  color: var(--moon-color-gray);
+}
+
+/* The doubled class outranks the font-family that .moonstone-typography sets. */
+.monospace.monospace {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}

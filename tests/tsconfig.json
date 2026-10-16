@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "types": ["cypress", "node", "@jahia/cypress", "cypress-real-events", "cypress-wait-until"],
+        "lib": ["es2017", "dom"],
+        "skipLibCheck": true
+    },
+    "include": ["cypress/*/*.ts", "cypress.config.ts"]
+}

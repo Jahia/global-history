@@ -1,0 +1,7 @@
+node
+node_modules
+target
+tests
+.__mf__temp
+src/main/resources/javascript/apps
+src/main/resources/javascript/locales
