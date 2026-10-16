@@ -1,0 +1,23 @@
+query globalHistoryPage($path: String!, $offset: Int, $limit: Int) {
+    jcr {
+        nodeByPath(path: $path) {
+            uuid
+            globalHistory {
+                totalCount
+                entries(offset: $offset, limit: $limit) {
+                    id
+                    timestamp
+                    uuid
+                    path
+                    action
+                    propertyName
+                    userKey
+                    message
+                    language
+                    nodeExists
+                    nodeName
+                }
+            }
+        }
+    }
+}

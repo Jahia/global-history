@@ -1,0 +1,4 @@
+- addMavenRepository: 'https://devtools.jahia.com/nexus/content/groups/enterprise/@id=jahia-enterprise@snapshots'
+  username: 'NEXUS_USERNAME'
+  password: 'NEXUS_PASSWORD'
+# env.provision.sh of @jahia/cypress installs every artifacts/*-SNAPSHOT.jar after this manifest.

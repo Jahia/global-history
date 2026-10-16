@@ -1,0 +1,14 @@
+import {deleteSite, deleteUser} from '@jahia/cypress';
+import {ALL_SITE_KEYS, EDITOR} from '../support/globalHistory';
+
+describe('Global history test suite teardown', () => {
+    it('deletes the test sites and the editor', () => {
+        if (Cypress.env('GLOBAL_HISTORY_KEEP_SITES') === true) {
+            cy.log('Skipping the site deletion because GLOBAL_HISTORY_KEEP_SITES=true');
+            return;
+        }
+
+        ALL_SITE_KEYS.forEach(siteKey => deleteSite(siteKey));
+        deleteUser(EDITOR.username);
+    });
+});

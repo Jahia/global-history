@@ -1,0 +1,10 @@
+query globalHistoryTotalCount($path: String!) {
+    jcr {
+        nodeByPath(path: $path) {
+            uuid
+            globalHistory {
+                totalCount
+            }
+        }
+    }
+}

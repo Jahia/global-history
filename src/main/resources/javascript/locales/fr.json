@@ -1,0 +1,42 @@
+{
+  "label": "Global History",
+  "siteHistory": {
+    "nav": "Historique du site",
+    "title": "Historique du site : {{siteName}}",
+    "columns": {
+      "date": "Date",
+      "user": "Utilisateur",
+      "action": "Action",
+      "name": "Nom",
+      "property": "Propriété",
+      "language": "Langue",
+      "path": "Chemin",
+      "uuid": "UUID",
+      "message": "Message"
+    },
+    "actions": {
+      "created": "Créé",
+      "updated": "Mis à jour",
+      "deleted": "Supprimé",
+      "moved": "Déplacé",
+      "added": "Ajouté",
+      "changed": "Modifié",
+      "removed": "Retiré",
+      "published": "Publié",
+      "unpublished": "Dépublié",
+      "accessed": "Accédé",
+      "viewed": "Consulté",
+      "previewed": "Prévisualisé",
+      "workflow_started": "Workflow démarré",
+      "workflow_finished": "Workflow terminé"
+    },
+    "empty": "Aucune entrée d'historique trouvée",
+    "errorTitle": "Impossible d'afficher l'historique",
+    "error": "Erreur lors du chargement de l'historique",
+    "accessDenied": "Vous n'avez pas la permission de consulter l'historique de ce site.",
+    "pagination": {
+      "itemsPerPage": "Lignes par page",
+      "of": "de"
+    }
+  }
+}

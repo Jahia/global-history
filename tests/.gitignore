@@ -1,0 +1,11 @@
+instrumented/
+.nyc_output
+cypress/videos
+coverage
+node_modules
+run-artifacts
+.env
+artifacts
+build-dependencies
+results
+.yarn/install-state.gz

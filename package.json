@@ -1,0 +1,47 @@
+{
+  "name": "globalhistory",
+  "comment-for-name": "do not use global-history for package name otherwise it blocks the rendering of the ui",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "yarn@4.13.0",
+  "scripts": {
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "lint": "eslint --ext js,jsx,ts,tsx,json,cjs,mjs .",
+    "lint:fix": "yarn lint --fix"
+  },
+  "_comment-dependencies": "Every key of dependencies is a federation share the app shell provides. Everything else is bundled privately.",
+  "_comment-toolchain-pins": "vite, @jahia/vite-federation-plugin and the @module-federation/vite resolution are pinned together, as in the tasks module.",
+  "dependencies": {
+    "@apollo/client": "^3.11.0",
+    "@jahia/ui-extender": "^1.2.0",
+    "i18next": "^20.6.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^11.18.6"
+  },
+  "devDependencies": {
+    "@jahia/eslint-config": "^2.2.0",
+    "@jahia/moonstone": "2.20.3",
+    "@jahia/vite-federation-plugin": "0.1.1",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18",
+    "@typescript-eslint/eslint-plugin": "^8.51.0",
+    "@typescript-eslint/parser": "^8.51.0",
+    "dayjs": "1.11.21",
+    "eslint": "^8.57.1",
+    "eslint-plugin-json": "^4.0.1",
+    "graphql": "^16.13.1",
+    "typescript": "^5.9.3",
+    "vite": "7.3.5"
+  },
+  "resolutions": {
+    "@module-federation/vite": "1.12.3"
+  },
+  "jahia": {
+    "remotes": {
+      "jahia": "javascript/apps/remoteEntry.js"
+    }
+  }
+}

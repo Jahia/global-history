@@ -1,0 +1,42 @@
+{
+  "label": "Global History",
+  "siteHistory": {
+    "nav": "Site history",
+    "title": "Site history: {{siteName}}",
+    "columns": {
+      "date": "Date",
+      "user": "User",
+      "action": "Action",
+      "name": "Name",
+      "property": "Property",
+      "language": "Language",
+      "path": "Path",
+      "uuid": "UUID",
+      "message": "Message"
+    },
+    "actions": {
+      "created": "Created",
+      "updated": "Updated",
+      "deleted": "Deleted",
+      "moved": "Moved",
+      "added": "Added",
+      "changed": "Modified",
+      "removed": "Removed",
+      "published": "Published",
+      "unpublished": "Unpublished",
+      "accessed": "Accessed",
+      "viewed": "Viewed",
+      "previewed": "Previewed",
+      "workflow_started": "Workflow started",
+      "workflow_finished": "Workflow finished"
+    },
+    "empty": "No history entries found",
+    "errorTitle": "Cannot show the history",
+    "error": "Error loading history",
+    "accessDenied": "You do not have the permission to view the history of this site.",
+    "pagination": {
+      "itemsPerPage": "Rows per page",
+      "of": "of"
+    }
+  }
+}

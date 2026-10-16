@@ -1,0 +1,41 @@
+/* The wrapper of LayoutContent wraps its flex column, so the content takes the width of the table instead of the page. */
+.layout {
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+/* The overlay sits on this box and not on the scrolling Paper, so it covers the visible table at any scroll position. */
+.tableArea {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.tableWrapper {
+  min-height: 0;
+  overflow: auto;
+}
+
+/* DataTable rows wrap once the fixed column widths exceed the row, so the table keeps room for the fluid Name and Path columns. */
+.tableWrapper table {
+  min-width: 1600px;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(255 255 255 / 60%);
+}
+
+.secondary {
+  color: var(--moon-color-gray);
+}
+
+/* The doubled class outranks the font-family that .moonstone-typography sets. */
+.monospace.monospace {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}

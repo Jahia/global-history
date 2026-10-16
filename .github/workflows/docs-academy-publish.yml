@@ -1,0 +1,13 @@
+# DO NOT EDIT
+# This file is managed globally at https://github.com/Jahia/.github
+name: Academy Docs - Publication
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  WF:
+    uses: Jahia/jahia-modules-action/.github/workflows/reusable-academy-publish.yml@v2
+    secrets: inherit

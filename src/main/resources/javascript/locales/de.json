@@ -1,0 +1,42 @@
+{
+  "label": "Global History",
+  "siteHistory": {
+    "nav": "Website-Verlauf",
+    "title": "Website-Verlauf: {{siteName}}",
+    "columns": {
+      "date": "Datum",
+      "user": "Benutzer",
+      "action": "Aktion",
+      "name": "Name",
+      "property": "Eigenschaft",
+      "language": "Sprache",
+      "path": "Pfad",
+      "uuid": "UUID",
+      "message": "Nachricht"
+    },
+    "actions": {
+      "created": "Erstellt",
+      "updated": "Aktualisiert",
+      "deleted": "Gelöscht",
+      "moved": "Verschoben",
+      "added": "Hinzugefügt",
+      "changed": "Geändert",
+      "removed": "Entfernt",
+      "published": "Veröffentlicht",
+      "unpublished": "Unveröffentlicht",
+      "accessed": "Zugegriffen",
+      "viewed": "Angesehen",
+      "previewed": "Vorschau",
+      "workflow_started": "Workflow gestartet",
+      "workflow_finished": "Workflow abgeschlossen"
+    },
+    "empty": "Keine Verlaufseinträge gefunden",
+    "errorTitle": "Der Verlauf kann nicht angezeigt werden",
+    "error": "Fehler beim Laden des Verlaufs",
+    "accessDenied": "Sie haben keine Berechtigung, den Verlauf dieser Website anzuzeigen.",
+    "pagination": {
+      "itemsPerPage": "Zeilen pro Seite",
+      "of": "von"
+    }
+  }
+}
