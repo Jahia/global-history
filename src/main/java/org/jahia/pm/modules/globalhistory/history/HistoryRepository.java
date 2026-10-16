@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reads the rows of {@code jahia_contenthistory} whose path is a node path or starts below it.
+ * Reads the rows of {@code jahia_contenthistory} that match a {@link HistoryFilter}.
  */
 public class HistoryRepository {
 
@@ -32,11 +32,12 @@ public class HistoryRepository {
         return new HistoryRepository(DatabaseUtils.getDatasource(), HistoryDialect.forDatabaseType(DatabaseUtils.getDatabaseType()));
     }
 
-    public long count(String nodePath) throws SQLException {
+    public long count(HistoryFilter filter) throws SQLException {
+        HistorySql sql = dialect.countSql(filter);
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(dialect.countSql())) {
+             PreparedStatement statement = connection.prepareStatement(sql.getText())) {
             statement.setQueryTimeout(QUERY_TIMEOUT_SECONDS);
-            bindPatterns(statement, nodePath);
+            bind(statement, sql);
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next() ? resultSet.getLong(1) : 0;
             }
@@ -46,14 +47,12 @@ public class HistoryRepository {
     /**
      * @return the rows of the page, newest first
      */
-    public List<HistoryRow> page(String nodePath, HistoryPage page) throws SQLException {
+    public List<HistoryRow> page(HistoryFilter filter, HistoryPage page) throws SQLException {
+        HistorySql sql = dialect.pageSql(filter, page);
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(dialect.pageSql())) {
+             PreparedStatement statement = connection.prepareStatement(sql.getText())) {
             statement.setQueryTimeout(QUERY_TIMEOUT_SECONDS);
-            int index = bindPatterns(statement, nodePath);
-            for (int value : dialect.paginationParameters(page)) {
-                statement.setInt(++index, value);
-            }
+            bind(statement, sql);
             List<HistoryRow> rows = new ArrayList<>(page.getLimit());
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -64,12 +63,11 @@ public class HistoryRepository {
         }
     }
 
-    private static int bindPatterns(PreparedStatement statement, String nodePath) throws SQLException {
+    private static void bind(PreparedStatement statement, HistorySql sql) throws SQLException {
         int index = 0;
-        for (String pattern : HistoryPaths.likePatterns(nodePath)) {
-            statement.setString(++index, pattern);
+        for (Object parameter : sql.getParameters()) {
+            statement.setObject(++index, parameter);
         }
-        return index;
     }
 
     private static HistoryRow toRow(ResultSet resultSet) throws SQLException {

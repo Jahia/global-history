@@ -34,6 +34,18 @@
     "errorTitle": "Der Verlauf kann nicht angezeigt werden",
     "error": "Fehler beim Laden des Verlaufs",
     "accessDenied": "Sie haben keine Berechtigung, den Verlauf dieser Website anzuzeigen.",
+    "filters": {
+      "action": "Aktion",
+      "dateFrom": "Von",
+      "dateTo": "Bis",
+      "path": "Pfad, zum Beispiel {{example}}",
+      "clear": "Filter zurücksetzen",
+      "noMatch": "Kein Verlaufseintrag entspricht den Filtern",
+      "pathOutsideSite": "Der Pfad muss {{sitePath}} oder ein Pfad darunter sein",
+      "today": "Heute",
+      "nextMonth": "Zum nächsten Monat",
+      "previousMonth": "Zum vorherigen Monat"
+    },
     "pagination": {
       "itemsPerPage": "Zeilen pro Seite",
       "of": "von"

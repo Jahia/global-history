@@ -2,6 +2,10 @@ package org.jahia.pm.modules.globalhistory.history;
 
 import org.jahia.utils.DatabaseUtils.DatabaseType;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * The SQL of the history queries for one database vendor.
  */
@@ -63,32 +67,54 @@ public enum HistoryDialect {
     }
 
     /**
-     * @return the count query, which takes the two patterns of {@link HistoryPaths#likePatterns(String)}
+     * @return the count query of the rows that match the filter
      */
-    public String countSql() {
-        return "SELECT COUNT(*) FROM " + TABLE + " WHERE " + pathCondition();
+    public HistorySql countSql(HistoryFilter filter) {
+        HistorySql where = where(filter);
+        return new HistorySql("SELECT COUNT(*) FROM " + TABLE + " WHERE " + where.getText(), where.getParameters());
     }
 
     /**
-     * @return the page query, which takes the two patterns of {@link HistoryPaths#likePatterns(String)},
-     * then the values of {@link #paginationParameters(HistoryPage)}
+     * @return the page query of the rows that match the filter, newest first
      */
-    public String pageSql() {
-        return "SELECT id, entry_date, uuid, property_name, " + pathExpression + " AS entry_path, entry_action, user_key, message"
+    public HistorySql pageSql(HistoryFilter filter, HistoryPage page) {
+        HistorySql where = where(filter);
+        List<Object> parameters = new ArrayList<>(where.getParameters());
+        if (pagination == Pagination.LIMIT_OFFSET) {
+            parameters.add(page.getLimit());
+            parameters.add(page.getOffset());
+        } else {
+            parameters.add(page.getOffset());
+            parameters.add(page.getLimit());
+        }
+        String text = "SELECT id, entry_date, uuid, property_name, " + pathExpression + " AS entry_path, entry_action, user_key, message"
                 + " FROM " + TABLE
-                + " WHERE " + pathCondition()
+                + " WHERE " + where.getText()
                 + " ORDER BY entry_date DESC, id DESC "
                 + pagination.clause;
+        return new HistorySql(text, parameters);
     }
 
     /**
-     * @return the offset and the limit of the page, in the order of the pagination clause
+     * @return the condition of the filter, without the {@code WHERE} keyword
      */
-    public int[] paginationParameters(HistoryPage page) {
-        if (pagination == Pagination.LIMIT_OFFSET) {
-            return new int[]{page.getLimit(), page.getOffset()};
+    HistorySql where(HistoryFilter filter) {
+        List<String> conditions = new ArrayList<>();
+        List<Object> parameters = new ArrayList<>(HistoryPaths.likePatterns(filter.getPath()));
+        conditions.add(pathCondition());
+        if (!filter.getActions().isEmpty()) {
+            conditions.add("entry_action IN (" + String.join(", ", Collections.nCopies(filter.getActions().size(), "?")) + ")");
+            parameters.addAll(filter.getActions());
         }
-        return new int[]{page.getOffset(), page.getLimit()};
+        if (filter.getFromTimestamp() != null) {
+            conditions.add("entry_date >= ?");
+            parameters.add(filter.getFromTimestamp());
+        }
+        if (filter.getBeforeTimestamp() != null) {
+            conditions.add("entry_date < ?");
+            parameters.add(filter.getBeforeTimestamp());
+        }
+        return new HistorySql(String.join(" AND ", conditions), parameters);
     }
 
     private String pathCondition() {

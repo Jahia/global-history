@@ -34,6 +34,18 @@
     "errorTitle": "Cannot show the history",
     "error": "Error loading history",
     "accessDenied": "You do not have the permission to view the history of this site.",
+    "filters": {
+      "action": "Action",
+      "dateFrom": "From",
+      "dateTo": "To",
+      "path": "Path, for example {{example}}",
+      "clear": "Clear filters",
+      "noMatch": "No history entry matches the filters",
+      "pathOutsideSite": "The path must be {{sitePath}} or a path below it",
+      "today": "Today",
+      "nextMonth": "Go to the next month",
+      "previousMonth": "Go to the previous month"
+    },
     "pagination": {
       "itemsPerPage": "Rows per page",
       "of": "of"

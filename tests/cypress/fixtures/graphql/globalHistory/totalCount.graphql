@@ -1,9 +1,9 @@
-query globalHistoryTotalCount($path: String!) {
+query globalHistoryTotalCount($path: String!, $filter: InputGlobalHistoryFilter) {
     jcr {
         nodeByPath(path: $path) {
             uuid
             globalHistory {
-                totalCount
+                totalCount(filter: $filter)
             }
         }
     }
