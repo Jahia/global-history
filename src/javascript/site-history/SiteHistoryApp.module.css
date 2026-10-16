@@ -4,9 +4,17 @@
   flex-wrap: nowrap;
 }
 
-.tableWrapper {
+/* The overlay sits on this box and not on the scrolling Paper, so it covers the visible table at any scroll position. */
+.tableArea {
   position: relative;
-  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.tableWrapper {
+  min-height: 0;
+  overflow: auto;
 }
 
 /* DataTable rows wrap once the fixed column widths exceed the row, so the table keeps room for the fluid Name and Path columns. */

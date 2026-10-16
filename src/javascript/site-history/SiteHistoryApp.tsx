@@ -70,8 +70,9 @@ const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
     content = <EmptyData message={t("siteHistory.empty")} data-sel-role="site-history-empty"/>;
   } else {
     content = (
-        <Paper hasPadding={false} className={styles.tableWrapper} aria-busy={loading} data-sel-role="site-history-table">
-            <DataTable
+        <div className={styles.tableArea}>
+            <Paper hasPadding={false} className={styles.tableWrapper} aria-busy={loading} data-sel-role="site-history-table">
+                <DataTable
           enablePagination
           primaryKey="id"
           data={rows}
@@ -91,12 +92,13 @@ const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
             setCurrentPage(1);
           }}
         />
+            </Paper>
             {loading && (
             <div className={styles.overlay}>
                 <Loader size="big"/>
             </div>
         )}
-        </Paper>
+        </div>
     );
   }
 
