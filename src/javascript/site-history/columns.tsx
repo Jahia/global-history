@@ -79,6 +79,12 @@ export const toRow = (entry: HistoryEntry, uiLanguage: string): HistoryTableRow 
 
 const ellipsis = (text: string) => <Typography isNowrap component="span" title={text}>{text}</Typography>;
 
+const scrollFromEnd = (text: string) => (
+    <div className={styles.scrollFromEnd} title={text}>
+        <bdi dir="ltr">{text}</bdi>
+    </div>
+);
+
 const withTechnicalName = (label: string, technicalName: string) => (
     <Typography isNowrap component="span" title={technicalName && technicalName !== label ? `${label} (${technicalName})` : label}>
         {label}
@@ -92,7 +98,7 @@ export const buildColumns = (t: Translate): DataTableColumn<HistoryTableRow>[] =
   {
     key: "date",
     label: t("siteHistory.columns.date"),
-    width: "160px",
+    width: "190px",
   },
   {
     key: "user",
@@ -135,7 +141,7 @@ export const buildColumns = (t: Translate): DataTableColumn<HistoryTableRow>[] =
   {
     key: "path",
     label: t("siteHistory.columns.path"),
-    render: ({ value }) => ellipsis(value as string),
+    render: ({ value }) => scrollFromEnd(value as string),
   },
   {
     key: "uuid",

@@ -6,7 +6,7 @@ import { I18nextProvider, useTranslation } from "react-i18next";
 import { i18n, NAMESPACE } from "../i18n.ts";
 import { buildColumns, toRow } from "./columns.tsx";
 import { toHistoryFilter, withColumnFilter } from "./filters.ts";
-import { ClearFilters, FilterControls, PathFilter } from "./HistoryFilters.tsx";
+import { HistoryFilters } from "./HistoryFilters.tsx";
 import { SITE_HISTORY_QUERY, type HistoryEntry, type SiteHistoryData, type SiteHistoryVariables } from "./siteHistory.gql.ts";
 import styles from "./SiteHistoryApp.module.css";
 
@@ -137,15 +137,15 @@ const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
       className={styles.layout}
       isLoading={isFirstLoad}
       data-sel-role="site-history"
-      header={
-          <Header
-          title={t("siteHistory.title", { siteName })}
-          search={<PathFilter filters={columnFilters} sitePath={sitePath} onChange={setFilter}/>}
-          toolbarLeft={<FilterControls filters={columnFilters} locale={uiLanguage} onChange={setFilter}/>}
-          toolbarRight={<ClearFilters filters={columnFilters} onClear={clearFilters}/>}
-        />
-      }
+      header={<Header title={t("siteHistory.title", { siteName })}/>}
       >
+          <HistoryFilters
+          filters={columnFilters}
+          sitePath={sitePath}
+          locale={uiLanguage}
+          onChange={setFilter}
+          onClear={clearFilters}
+        />
           {content}
       </LayoutContent>
   );

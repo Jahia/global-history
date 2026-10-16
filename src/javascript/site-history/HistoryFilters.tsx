@@ -14,7 +14,7 @@ const toDay = (value: Temporal.PlainDate | null): string => value?.toString() ??
 
 type PathFilterProps = Readonly<{ filters: ColumnFiltersState; sitePath: string; onChange: SetFilter }>;
 
-export const PathFilter = ({ filters, sitePath, onChange }: PathFilterProps) => {
+const PathFilter = ({ filters, sitePath, onChange }: PathFilterProps) => {
   const { t } = useTranslation(NAMESPACE);
   const path = filterValue<string>(filters, "path") ?? "";
   const [draft, setDraft] = useState(path);
@@ -50,7 +50,7 @@ export const PathFilter = ({ filters, sitePath, onChange }: PathFilterProps) => 
 
 type FilterControlsProps = Readonly<{ filters: ColumnFiltersState; locale: string; onChange: SetFilter }>;
 
-export const FilterControls = ({ filters, locale, onChange }: FilterControlsProps) => {
+const FilterControls = ({ filters, locale, onChange }: FilterControlsProps) => {
   const { t } = useTranslation(NAMESPACE);
   const actions = filterValue<string[]>(filters, "action") ?? [];
   const [from, to] = filterValue<DateRange>(filters, "date") ?? ["", ""];
@@ -81,40 +81,43 @@ export const FilterControls = ({ filters, locale, onChange }: FilterControlsProp
         onChange={(_event, { value }) => value && toggleAction(value)}
         onClear={() => onChange("action", [])}
       />
-          <DateTimeInput
-        type="date"
-        variant="outlined"
-        locale={locale}
-        i18n={calendarLabels}
-        value={from}
-        maxDate={to}
-        placeholder={t("siteHistory.filters.dateFrom")}
-        aria-label={t("siteHistory.filters.dateFrom")}
-        data-sel-role="filter-date-from"
-        onChange={(_event, value) => onChange("date", [toDay(value), to])}
-      />
-          <DateTimeInput
-        type="date"
-        variant="outlined"
-        locale={locale}
-        i18n={calendarLabels}
-        value={to}
-        minDate={from}
-        placeholder={t("siteHistory.filters.dateTo")}
-        aria-label={t("siteHistory.filters.dateTo")}
-        data-sel-role="filter-date-to"
-        onChange={(_event, value) => onChange("date", [from, toDay(value)])}
-      />
+          <div className={styles.dateRange}>
+              <DateTimeInput
+          type="date"
+          variant="outlined"
+          locale={locale}
+          i18n={calendarLabels}
+          value={from}
+          maxDate={to}
+          placeholder={t("siteHistory.filters.dateFrom")}
+          aria-label={t("siteHistory.filters.dateFrom")}
+          data-sel-role="filter-date-from"
+          onChange={(_event, value) => onChange("date", [toDay(value), to])}
+        />
+              <DateTimeInput
+          type="date"
+          variant="outlined"
+          locale={locale}
+          i18n={calendarLabels}
+          value={to}
+          minDate={from}
+          placeholder={t("siteHistory.filters.dateTo")}
+          aria-label={t("siteHistory.filters.dateTo")}
+          data-sel-role="filter-date-to"
+          onChange={(_event, value) => onChange("date", [from, toDay(value)])}
+        />
+          </div>
       </>
   );
 };
 
 type ClearFiltersProps = Readonly<{ filters: ColumnFiltersState; onClear: () => void }>;
 
-export const ClearFilters = ({ filters, onClear }: ClearFiltersProps) => {
+const ClearFilters = ({ filters, onClear }: ClearFiltersProps) => {
   const { t } = useTranslation(NAMESPACE);
   return (
       <Button
+      className={styles.clearFilters}
       variant="ghost"
       icon={<Close/>}
       label={t("siteHistory.filters.clear")}
@@ -124,3 +127,19 @@ export const ClearFilters = ({ filters, onClear }: ClearFiltersProps) => {
     />
   );
 };
+
+type HistoryFiltersProps = Readonly<{
+  filters: ColumnFiltersState;
+  sitePath: string;
+  locale: string;
+  onChange: SetFilter;
+  onClear: () => void;
+}>;
+
+export const HistoryFilters = ({ filters, sitePath, locale, onChange, onClear }: HistoryFiltersProps) => (
+    <div className={styles.filters} data-sel-role="site-history-filters">
+        <PathFilter filters={filters} sitePath={sitePath} onChange={onChange}/>
+        <FilterControls filters={filters} locale={locale} onChange={onChange}/>
+        <ClearFilters filters={filters} onClear={onClear}/>
+    </div>
+);
