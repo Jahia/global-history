@@ -74,6 +74,38 @@ query {
 - `totalCount` is an exact count of the rows.
 - Each SQL query has a timeout of 30 seconds.
 
+`totalCount` and `entries` take an optional `filter` argument of type `InputGlobalHistoryFilter`. A row must match every field that is set, and a null or empty field matches every row.
+
+| Field | Rows that match |
+|---|---|
+| `actions` | The action is one of these values. The list holds at most 20 values. |
+| `fromTimestamp` | The date is at or after this time, in milliseconds since epoch. |
+| `beforeTimestamp` | The date is before this time, in milliseconds since epoch. |
+| `path` | The path is this path or a path below it. A path outside the node returns an error. A path with `[` or `]` returns an error too. |
+
+```graphql
+query ($filter: InputGlobalHistoryFilter) {
+    jcr {
+        nodeByPath(path: "/sites/digitall") {
+            globalHistory {
+                totalCount(filter: $filter)
+                entries(limit: 20, filter: $filter) {
+                    date
+                    action
+                    path
+                }
+            }
+        }
+    }
+}
+```
+
+The variables of this query list the published rows of `/sites/digitall/home` since a date:
+
+```json
+{"filter": {"actions": ["published"], "fromTimestamp": 1790805600000, "path": "/sites/digitall/home"}}
+```
+
 ## Limits
 
 - A moved node keeps the old path on its old rows. Those rows stay listed under the old path.
@@ -84,8 +116,19 @@ query {
 - Jahia records the `default` workspace only. An edit made in the `live` workspace leaves no row.
 - A site that is deleted and created again with the same key shows the rows of the old site until the purge deletes them.
 - When a whole site is published for the first time, Jahia writes a `published` row for the site node only. A node that changes later gets its own `published` row when it is published again.
-- No database index covers the path column, so each count reads the whole history table. With 2,000,000 rows on MariaDB and Jahia 8.2.4, a count took 1.3 seconds.
-- The first page of a site with few rows reads most of the date index. With the same 2,000,000 rows, it took 3.5 seconds. Jahia 8.2.3 and older have no date index.
+- No database index covers the path column or the action column, so a count reads the whole history table. On Jahia 8.2.4 and newer, a count with a date filter reads only the rows of its date range, through the date index.
+- The first page of a site with few rows reads most of the date index. A filter that matches few rows has the same cost on any site. Jahia 8.2.3 and older have no date index.
+- The page of the module asks for `totalCount` and `entries` in one request. On a site with few rows, or with a filter that matches no row, this request took up to 7.3 seconds.
+
+The table gives the worst time of one GraphQL request with 2,000,000 rows on MariaDB and Jahia 8.2.4. The rows have 5 actions in 10 folders, and the date filter covers 24 hours.
+
+| Filter | `totalCount` | `entries(limit: 20)` |
+|---|---|---|
+| None | 2.2 s | 5.4 s |
+| `actions` | 2.0 s | 5.6 s |
+| `path` | 2.1 s | 6.2 s |
+| `fromTimestamp` and `beforeTimestamp` | 0.17 s | 0.12 s |
+| `actions`, the dates and `path` | 0.17 s | 0.11 s |
 
 ## Database support
 

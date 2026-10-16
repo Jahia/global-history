@@ -34,6 +34,18 @@
     "errorTitle": "Impossible d'afficher l'historique",
     "error": "Erreur lors du chargement de l'historique",
     "accessDenied": "Vous n'avez pas la permission de consulter l'historique de ce site.",
+    "filters": {
+      "action": "Action",
+      "dateFrom": "Du",
+      "dateTo": "Au",
+      "path": "Chemin, par exemple {{example}}",
+      "clear": "Effacer les filtres",
+      "noMatch": "Aucune entrée d'historique ne correspond aux filtres",
+      "pathOutsideSite": "Le chemin doit être {{sitePath}} ou un chemin en dessous",
+      "today": "Aujourd'hui",
+      "nextMonth": "Aller au mois suivant",
+      "previousMonth": "Aller au mois précédent"
+    },
     "pagination": {
       "itemsPerPage": "Lignes par page",
       "of": "de"

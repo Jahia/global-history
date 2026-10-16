@@ -38,23 +38,37 @@ export type SiteHistoryData = {
   };
 };
 
+export type HistoryFilterInput = {
+  actions?: string[];
+  fromTimestamp?: number;
+  beforeTimestamp?: number;
+  path?: string;
+};
+
 export type SiteHistoryVariables = {
   path: string;
   uiLanguage: string;
   offset: number;
   limit: number;
+  filter: HistoryFilterInput;
 };
 
 export const SITE_HISTORY_QUERY = gql`
-  query globalHistorySiteHistory($path: String!, $uiLanguage: String!, $offset: Int!, $limit: Int!) {
+  query globalHistorySiteHistory(
+    $path: String!
+    $uiLanguage: String!
+    $offset: Int!
+    $limit: Int!
+    $filter: InputGlobalHistoryFilter
+  ) {
     jcr {
       nodeByPath(path: $path) {
         uuid
         workspace
         displayName(language: $uiLanguage)
         globalHistory {
-          totalCount
-          entries(offset: $offset, limit: $limit) {
+          totalCount(filter: $filter)
+          entries(offset: $offset, limit: $limit, filter: $filter) {
             id
             date
             uuid

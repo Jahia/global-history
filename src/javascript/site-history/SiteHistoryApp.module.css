@@ -39,3 +39,18 @@
 .monospace.monospace {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
+
+/* The doubled class outranks the width: 100% that moonstone gives every Input. */
+.pathFilter.pathFilter {
+  width: 240px;
+}
+
+.actionFilter {
+  flex: none;
+  width: 160px;
+}
+
+.actionFilter :global(.moonstone-dropdown_tags) {
+  flex-wrap: nowrap;
+  overflow: hidden;
+}

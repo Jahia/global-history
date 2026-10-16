@@ -39,6 +39,13 @@ export type GlobalHistory = {
     entries: HistoryEntry[];
 };
 
+export type HistoryFilter = {
+    actions?: string[];
+    fromTimestamp?: number;
+    beforeTimestamp?: number;
+    path?: string;
+};
+
 type GraphqlResult = ApolloQueryResult<unknown> | FetchResult;
 
 type HistoryData = {
@@ -66,18 +73,23 @@ const historyOf = (result: GraphqlResult, path: string): GlobalHistory => {
     return {totalCount: history.totalCount, entries: (history.entries ?? []).filter(Boolean)};
 };
 
-export const historyPage = (path: string, offset: number, limit: number | null): Cypress.Chainable<GlobalHistory> =>
+export const historyPage = (
+    path: string,
+    offset: number,
+    limit: number | null,
+    filter?: HistoryFilter
+): Cypress.Chainable<GlobalHistory> =>
     cy
         .apollo({
             queryFile: 'graphql/globalHistory/historyPage.graphql',
-            variables: {path, offset, limit},
+            variables: {path, offset, limit, filter},
             errorPolicy: 'all'
         })
         .then(result => historyOf(result, path));
 
-export const historyTotal = (path: string): Cypress.Chainable<number> =>
+export const historyTotal = (path: string, filter?: HistoryFilter): Cypress.Chainable<number> =>
     cy
-        .apollo({queryFile: 'graphql/globalHistory/totalCount.graphql', variables: {path}, errorPolicy: 'all'})
+        .apollo({queryFile: 'graphql/globalHistory/totalCount.graphql', variables: {path, filter}, errorPolicy: 'all'})
         .then(result => historyOf(result, path).totalCount);
 
 export const nodeUuid = (path: string): Cypress.Chainable<string> =>
@@ -93,16 +105,17 @@ export const nodeUuid = (path: string): Cypress.Chainable<string> =>
 export const collectEntries = (
     path: string,
     isDone: (entries: HistoryEntry[]) => boolean,
+    filter?: HistoryFilter,
     collected: HistoryEntry[] = []
 ): Cypress.Chainable<HistoryEntry[]> =>
-    historyPage(path, collected.length, MAX_LIMIT).then(page => {
+    historyPage(path, collected.length, MAX_LIMIT, filter).then(page => {
         const entries = collected.concat(page.entries);
         const isLastPage = page.entries.length === 0 || entries.length >= page.totalCount;
         if (isDone(entries) || isLastPage || entries.length >= MAX_PAGES * MAX_LIMIT) {
             return cy.wrap(entries, {log: false});
         }
 
-        return collectEntries(path, isDone, entries);
+        return collectEntries(path, isDone, filter, entries);
     });
 
 export const hasActionForEach = (entries: HistoryEntry[], uuids: string[], action: string): boolean =>

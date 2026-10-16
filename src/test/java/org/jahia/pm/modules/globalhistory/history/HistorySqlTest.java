@@ -5,10 +5,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
@@ -16,8 +17,10 @@ class HistorySqlTest {
 
     private static final String LIMIT_OFFSET = "LIMIT ? OFFSET ?";
     private static final String OFFSET_FETCH = "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-    private static final int[] LIMIT_THEN_OFFSET = {20, 40};
-    private static final int[] OFFSET_THEN_LIMIT = {40, 20};
+    private static final List<Object> LIMIT_THEN_OFFSET = asList(20, 40);
+    private static final List<Object> OFFSET_THEN_LIMIT = asList(40, 20);
+    private static final String SCOPE = "/sites/gh_1";
+    private static final List<Object> SCOPE_PATTERNS = asList("/sites/gh!_1", "/sites/gh!_1/%");
 
     static Stream<Arguments> dialects() {
         return Stream.of(
@@ -30,13 +33,37 @@ class HistorySqlTest {
 
     @ParameterizedTest
     @MethodSource("dialects")
-    void dialectWritesTheSqlOfItsVendor(HistoryDialect dialect, String path, String like, String pagination, int[] parameters) {
+    void dialectWritesTheSqlOfItsVendor(HistoryDialect dialect, String path, String like, String pagination,
+            List<Object> paginationParameters) {
+        HistoryFilter noFilter = HistoryFilter.of(SCOPE, null, null, null, null);
         String condition = path + " " + like + " ? ESCAPE '!'";
         String where = " WHERE (" + condition + " OR " + condition + ")";
-        assertEquals("SELECT COUNT(*) FROM jahia_contenthistory" + where, dialect.countSql());
+
+        HistorySql count = dialect.countSql(noFilter);
+        assertEquals("SELECT COUNT(*) FROM jahia_contenthistory" + where, count.getText());
+        assertEquals(SCOPE_PATTERNS, count.getParameters());
+
+        HistorySql page = dialect.pageSql(noFilter, HistoryPage.of(40, 20));
         assertEquals("SELECT id, entry_date, uuid, property_name, " + path + " AS entry_path, entry_action, user_key, message"
-                + " FROM jahia_contenthistory" + where + " ORDER BY entry_date DESC, id DESC " + pagination, dialect.pageSql());
-        assertArrayEquals(parameters, dialect.paginationParameters(HistoryPage.of(40, 20)));
+                + " FROM jahia_contenthistory" + where + " ORDER BY entry_date DESC, id DESC " + pagination, page.getText());
+        List<Object> parameters = new ArrayList<>(SCOPE_PATTERNS);
+        parameters.addAll(paginationParameters);
+        assertEquals(parameters, page.getParameters());
+
+        HistoryFilter everyFilter = HistoryFilter.of(SCOPE, "/sites/gh_1/contents", asList("created", "", null, "published"),
+                1790805600000L, 1792101600000L);
+        HistorySql filteredCount = dialect.countSql(everyFilter);
+        assertEquals("SELECT COUNT(*) FROM jahia_contenthistory" + where
+                + " AND entry_action IN (?, ?) AND entry_date >= ? AND entry_date < ?", filteredCount.getText());
+        assertEquals(asList("/sites/gh!_1/contents", "/sites/gh!_1/contents/%", "created", "published", 1790805600000L,
+                1792101600000L), filteredCount.getParameters());
+    }
+
+    @Test
+    void pathFilterReplacesTheScope() {
+        assertEquals(asList("/sites/gh!_1/contents/a!_b", "/sites/gh!_1/contents/a!_b/%"),
+                HistoryDialect.DERBY.where(HistoryFilter.of(SCOPE, "/sites/gh_1/contents/a_b//", null, null, null)).getParameters());
+        assertEquals(SCOPE_PATTERNS, HistoryDialect.DERBY.where(HistoryFilter.of("/", SCOPE, null, null, null)).getParameters());
     }
 
     @Test

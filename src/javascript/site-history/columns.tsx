@@ -19,7 +19,7 @@ import styles from "./SiteHistoryApp.module.css";
 
 type ChipColor = "default" | "accent" | "success" | "warning" | "danger";
 
-const ACTION_CONFIG: Record<string, { icon: ComponentType; color: ChipColor }> = {
+export const ACTION_CONFIG: Record<string, { icon: ComponentType; color: ChipColor }> = {
   added: { icon: AddCircle, color: "accent" },
   changed: { icon: Edit, color: "warning" },
   created: { icon: AddCircle, color: "accent" },
@@ -130,7 +130,7 @@ export const buildColumns = (t: Translate): DataTableColumn<HistoryTableRow>[] =
     label: t("siteHistory.columns.language"),
     width: "90px",
     align: "center",
-    render: ({ value }) => (value ? <Pill label={(value as string).toUpperCase()}/> : <Language/>),
+    render: ({ value }) => (value ? <Pill>{(value as string).toUpperCase()}</Pill> : <Language/>),
   },
   {
     key: "path",
