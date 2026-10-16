@@ -20,6 +20,9 @@ const ACTION_FILTER = '[data-sel-role="filter-action"]';
 const DATE_FROM = '[data-sel-role="filter-date-from"]';
 const DATE_TO = '[data-sel-role="filter-date-to"]';
 const CLEAR_FILTERS = '[data-sel-role="filter-clear"]';
+const FILTER_CONTROLS = [PATH_FILTER, ACTION_FILTER, DATE_FROM, DATE_TO, CLEAR_FILTERS];
+const PAGE = '[data-sel-role="site-history"]';
+const FILTERS = '[data-sel-role="site-history-filters"]';
 const LOAD_TIMEOUT = 30000;
 const UI_LOCALE = 'en';
 
@@ -27,6 +30,10 @@ const textsOf = ($elements: JQuery<HTMLElement>) =>
     Cypress.$.makeArray($elements).map(element => (element.textContent ?? '').trim());
 
 const cellsOf = (columnLabel: string) => `${ROWS} td:nth-child(${COLUMN_LABELS.indexOf(columnLabel) + 1})`;
+
+const boxOf = (element: HTMLElement): DOMRect => element.getBoundingClientRect();
+
+const middleOf = (box: DOMRect): number => (box.top + box.bottom) / 2;
 
 const totalOf = (paginationText: string): number => Number(/ of (\d+)$/.exec(paginationText)?.[1]);
 
@@ -73,6 +80,27 @@ describe('Site history filters', () => {
             .invoke('text')
             .should('match', new RegExp(`^1-${PAGE_SIZE} of ${total}$`));
         cy.get(CLEAR_FILTERS).should('be.disabled');
+    });
+
+    it('shows the five controls in one row between the header and the table', () => {
+        cy.get(`${PAGE} header`).find(FILTER_CONTROLS.join(', ')).should('not.exist');
+        cy.get(FILTERS).should($filters => {
+            const filters = boxOf($filters[0]);
+            expect(filters.top, 'top of the filters').to.be.at.least(boxOf(Cypress.$(`${PAGE} header`)[0]).bottom);
+            expect(filters.bottom, 'bottom of the filters').to.be.at.most(boxOf(Cypress.$(TABLE)[0]).top);
+            const controls = FILTER_CONTROLS.map(selector => {
+                expect($filters.find(selector), `${selector} in the filters`).to.have.length(1);
+                return boxOf($filters.find(selector)[0]);
+            });
+            controls.slice(1).forEach((control, index) => {
+                expect(control.left, `left edge of ${FILTER_CONTROLS[index + 1]}`).to.be.above(controls[index].right);
+                expect(middleOf(control), `middle of ${FILTER_CONTROLS[index + 1]}`).to.be.closeTo(
+                    middleOf(controls[0]),
+                    2
+                );
+            });
+            expect(controls[controls.length - 1].right, 'right edge of Clear filters').to.be.closeTo(filters.right, 1);
+        });
     });
 
     it('lists the rows of the selected action', () => {

@@ -6,9 +6,13 @@ const ROWS = `${TABLE} tbody tr`;
 const TOTAL_ITEMS = `${TABLE} [data-testid="pagination-total-items"]`;
 const NEXT_PAGE = `${TABLE} [data-testid="pagination-button-next-page"]`;
 const LOAD_TIMEOUT = 30000;
+// The widest English date of the 'lll' format in Nunito Sans: the widest month, a two-digit day and hour, and AM.
+const WIDEST_DATE = 'May 10, 2026 10:00 AM';
 
 const textsOf = ($elements: JQuery<HTMLElement>) =>
     Cypress.$.makeArray($elements).map(element => (element.textContent ?? '').trim());
+
+const cellsOf = (columnLabel: string) => `${ROWS} td:nth-child(${COLUMN_LABELS.indexOf(columnLabel) + 1})`;
 
 describe('Site history page', () => {
     let total: number;
@@ -48,6 +52,42 @@ describe('Site history page', () => {
                 expect($secondPage.length, 'rows on page 2').to.equal(Math.min(PAGE_SIZE, total - PAGE_SIZE));
                 expect(textsOf($secondPage), 'rows on page 2').not.to.deep.equal(firstPage);
             });
+        });
+    });
+
+    it('shows every date in full', () => {
+        cy.get(cellsOf('Date'), {timeout: LOAD_TIMEOUT}).should($cells => {
+            expect($cells, 'Date cells').to.have.length(PAGE_SIZE);
+            $cells.each((_, cell) => {
+                expect(cell.scrollWidth, `width of "${cell.textContent}"`).to.be.at.most(cell.clientWidth);
+            });
+            const cell = $cells[0];
+            const style = cell.ownerDocument.defaultView.getComputedStyle(cell);
+            const context = cell.ownerDocument.createElement('canvas').getContext('2d');
+            context.font = style.font;
+            expect(cell.ownerDocument.fonts.check(context.font), `${context.font} loaded`).to.equal(true);
+            const room = cell.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+            expect(context.measureText(WIDEST_DATE).width, `width of "${WIDEST_DATE}"`).to.be.at.most(room);
+        });
+    });
+
+    it('scrolls a long path and opens it on its end', () => {
+        cy.get(`${cellsOf('Path')} bdi`, {timeout: LOAD_TIMEOUT}).should($paths => {
+            expect($paths, 'Path cells').to.have.length(PAGE_SIZE);
+            const path = Cypress._.maxBy($paths.toArray(), element => (element.textContent ?? '').length);
+            const scroller = path.parentElement;
+            expect(scroller.scrollWidth, `scroll width of ${path.textContent}`).to.be.above(scroller.clientWidth);
+            expect(path.getBoundingClientRect().right, `right edge of ${path.textContent}`).to.be.closeTo(
+                scroller.getBoundingClientRect().right,
+                1
+            );
+            const leadingSlash = path.ownerDocument.createRange();
+            leadingSlash.setStart(path.firstChild, 0);
+            leadingSlash.setEnd(path.firstChild, 1);
+            expect(leadingSlash.getBoundingClientRect().left, 'left edge of the leading slash').to.be.closeTo(
+                path.getBoundingClientRect().left,
+                1
+            );
         });
     });
 });

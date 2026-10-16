@@ -40,6 +40,34 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
+/* direction: rtl starts the scroll at the right end, so the cell opens on the end of the path. The bdi inside keeps the path left to right. */
+.scrollFromEnd {
+  min-width: 0;
+  overflow-x: auto;
+  direction: rtl;
+  white-space: nowrap;
+  scrollbar-width: thin;
+}
+
+.filters {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--moon-spacing-small);
+  margin-bottom: var(--moon-spacing-medium);
+}
+
+/* The two dates of the range wrap to the next row together. */
+.dateRange {
+  display: flex;
+  gap: var(--moon-spacing-small);
+}
+
+.clearFilters {
+  margin-left: auto;
+}
+
 /* The doubled class outranks the width: 100% that moonstone gives every Input. */
 .pathFilter.pathFilter {
   width: 240px;
