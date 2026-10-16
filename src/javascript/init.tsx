@@ -8,9 +8,9 @@ const SiteHistoryApp = lazy(() => import("./site-history/SiteHistoryApp.tsx"));
 type RouteProps = { match?: { params?: { siteKey?: string } } };
 
 const siteKeyOf = (props: RouteProps): string =>
-  props?.match?.params?.siteKey ?? window.jahia?.reduxStore?.getState().site ?? "";
+  props?.match?.params?.siteKey ?? globalThis.jahia?.reduxStore?.getState().site ?? "";
 
-export default function () {
+export default function registerGlobalHistory() {
   registry.add("callback", "global-history", {
     targets: ["jahiaApp-init:50"],
     callback: () => {

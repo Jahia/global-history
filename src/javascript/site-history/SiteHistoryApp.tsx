@@ -1,13 +1,10 @@
-import { useQuery } from "@apollo/client";
-import type { ApolloError } from "@apollo/client";
+import { useQuery, type ApolloError } from "@apollo/client";
 import { Banner, DataTable, EmptyData, Header, LayoutContent, Loader, Paper } from "@jahia/moonstone";
 import { useEffect, useMemo, useState } from "react";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import { i18n, NAMESPACE } from "../i18n.ts";
 import { buildColumns, toRow } from "./columns.tsx";
-import type { HistoryEntry } from "./siteHistory.gql.ts";
-import { SITE_HISTORY_QUERY } from "./siteHistory.gql.ts";
-import type { SiteHistoryData, SiteHistoryVariables } from "./siteHistory.gql.ts";
+import { SITE_HISTORY_QUERY, type HistoryEntry, type SiteHistoryData, type SiteHistoryVariables } from "./siteHistory.gql.ts";
 import styles from "./SiteHistoryApp.module.css";
 
 const ITEMS_PER_PAGE_OPTIONS = [20, 50, 100];
@@ -19,7 +16,7 @@ type SiteHistoryProps = Readonly<{ siteKey: string }>;
 
 const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
   const { t } = useTranslation(NAMESPACE);
-  const uiLanguage = window.contextJsParameters?.uilang ?? "en";
+  const uiLanguage = globalThis.contextJsParameters?.uilang ?? "en";
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0]);
 
@@ -31,7 +28,7 @@ const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
       limit: itemsPerPage,
     },
     fetchPolicy: "network-only",
-    client: window.jahia?.apolloClient,
+    client: globalThis.jahia?.apolloClient,
     skip: !siteKey,
   });
 

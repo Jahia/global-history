@@ -7,11 +7,19 @@ import org.jahia.utils.DatabaseUtils.DatabaseType;
  */
 public enum HistoryDialect {
 
-    MYSQL("entry_path", "LIKE BINARY", Pagination.LIMIT_OFFSET),
-    DERBY("entry_path", "LIKE", Pagination.OFFSET_FETCH),
-    POSTGRESQL("convert_from(lo_get(entry_path), 'UTF8')", "LIKE", Pagination.LIMIT_OFFSET),
-    ORACLE("entry_path", "LIKE", Pagination.OFFSET_FETCH),
-    MSSQL("entry_path COLLATE Latin1_General_BIN", "LIKE", Pagination.OFFSET_FETCH);
+    MYSQL(Sql.PATH, Sql.LIKE + " BINARY", Pagination.LIMIT_OFFSET),
+    DERBY(Sql.PATH, Sql.LIKE, Pagination.OFFSET_FETCH),
+    POSTGRESQL("convert_from(lo_get(" + Sql.PATH + "), 'UTF8')", Sql.LIKE, Pagination.LIMIT_OFFSET),
+    ORACLE(Sql.PATH, Sql.LIKE, Pagination.OFFSET_FETCH),
+    MSSQL(Sql.PATH + " COLLATE Latin1_General_BIN", Sql.LIKE, Pagination.OFFSET_FETCH);
+
+    private static final class Sql {
+        static final String PATH = "entry_path";
+        static final String LIKE = "LIKE";
+
+        private Sql() {
+        }
+    }
 
     private enum Pagination {
         LIMIT_OFFSET("LIMIT ? OFFSET ?"),
