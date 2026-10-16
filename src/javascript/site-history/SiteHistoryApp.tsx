@@ -103,6 +103,7 @@ const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
   return (
       <LayoutContent
       hasPadding
+      className={styles.layout}
       isLoading={isFirstLoad}
       data-sel-role="site-history"
       header={<Header title={t("siteHistory.title", { siteName })}/>}

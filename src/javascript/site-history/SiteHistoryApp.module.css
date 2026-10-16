@@ -1,3 +1,9 @@
+/* The wrapper of LayoutContent wraps its flex column, so the content takes the width of the table instead of the page. */
+.layout {
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
 .tableWrapper {
   position: relative;
   overflow-x: auto;
