@@ -36,12 +36,15 @@
     "accessDenied": "You do not have the permission to view the history of this site.",
     "filters": {
       "action": "Action",
+      "user": "User",
       "dateFrom": "From",
       "dateTo": "To",
       "path": "Path, for example {{example}}",
       "clear": "Clear filters",
+      "clearUsers": "Clear the selected users",
       "noMatch": "No history entry matches the filters",
       "pathOutsideSite": "The path must be {{sitePath}} or a path below it",
+      "tooManyUsers": "Select at most {{max}} users",
       "today": "Today",
       "nextMonth": "Go to the next month",
       "previousMonth": "Go to the previous month"

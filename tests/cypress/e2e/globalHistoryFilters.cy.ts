@@ -1,4 +1,5 @@
 import {
+    AUTHOR,
     collectEntries,
     CONTENT_FOLDER_PATH,
     GlobalHistory,
@@ -23,6 +24,9 @@ const idsOf = (entries: HistoryEntry[]) => entries.map(entry => entry.id);
 const otherActions = (entries: HistoryEntry[], actions: string[]) =>
     entries.filter(entry => !actions.includes(entry.action)).map(entry => entry.action);
 
+const otherUsers = (entries: HistoryEntry[], userKeys: string[]) =>
+    entries.filter(entry => !userKeys.includes(entry.userKey)).map(entry => entry.userKey);
+
 const outOfScopePaths = (entries: HistoryEntry[], scopePath: string) =>
     entries.filter(entry => !isInScope(entry.path, scopePath)).map(entry => entry.path);
 
@@ -46,6 +50,17 @@ const filteredEntries = (filter: HistoryFilter): Cypress.Chainable<HistoryEntry[
             return entries;
         })
     );
+
+// The count of the rows of each user, in the order of userKeys.
+const userTotals = (userKeys: string[], filter: HistoryFilter = {}): Cypress.Chainable<number[]> => {
+    const totals: number[] = [];
+    userKeys.forEach(userKey =>
+        historyTotal(SITE_PATH, {...filter, userKeys: [userKey]}).then(count => {
+            totals.push(count);
+        })
+    );
+    return cy.wrap(totals, {log: false});
+};
 
 const expectRefused = (filter: HistoryFilter, message: RegExp) =>
     cy
@@ -129,6 +144,56 @@ describe('globalHistory filters', () => {
             expect(count, 'rows of 20 unknown actions').to.equal(0);
         });
         expectRefused({actions}, /actions/);
+    });
+
+    it('keeps the rows of the selected users', () => {
+        const userKeys = ['root', AUTHOR.username];
+        userTotals(userKeys).then(([rootTotal, authorTotal]) => {
+            expect(rootTotal, 'rows of root').to.be.above(0).and.below(total);
+            expect(authorTotal, 'rows of gh-author').to.be.above(0).and.below(total);
+            historyTotal(SITE_PATH, {userKeys}).then(count => {
+                expect(count, 'rows of root and gh-author').to.equal(rootTotal + authorTotal);
+            });
+        });
+
+        // The rows of the gh_1 sites of earlier runs stay in the table, so the rows are read from this run on.
+        let since: HistoryFilter;
+        let runTotals: number[];
+        createdRowOf(CONTENT_FOLDER_PATH).then(created => {
+            since = {fromTimestamp: created.timestamp};
+            userTotals(userKeys, since).then(totals => {
+                runTotals = totals;
+            });
+        });
+        cy.then(() => filteredEntries({...since, userKeys: [AUTHOR.username]})).then(entries => {
+            expect(entries, 'rows of gh-author in this run').not.to.be.empty;
+            expect(otherUsers(entries, [AUTHOR.username]), 'users other than gh-author').to.deep.equal([]);
+        });
+        cy.then(() => filteredEntries({...since, userKeys})).then(entries => {
+            expect(entries, 'rows of root and gh-author in this run').to.have.length(runTotals[0] + runTotals[1]);
+            expect(
+                Cypress._.uniq(entries.map(entry => entry.userKey)).sort(),
+                'users of the rows of root and gh-author'
+            ).to.deep.equal([AUTHOR.username, 'root']);
+        });
+    });
+
+    it('reads a blank user key as no user filter', () => {
+        historyTotal(SITE_PATH, {userKeys: ['']}).then(count => {
+            expect(count, 'rows for the user key ""').to.equal(total);
+        });
+    });
+
+    it('accepts 100 user keys and refuses 101', () => {
+        const userKeys = Array.from({length: 101}, (_, index) => `user-${index + 1}`);
+        historyTotal(SITE_PATH, {userKeys: userKeys.slice(0, 100)}).then(count => {
+            expect(count, 'rows of 100 unknown users').to.equal(0);
+        });
+        // A blank key and a duplicate do not count toward the limit of 100 keys.
+        historyTotal(SITE_PATH, {userKeys: [...userKeys.slice(0, 100), '', 'user-1']}).then(count => {
+            expect(count, 'rows of 100 unknown users, a blank key and a duplicate').to.equal(0);
+        });
+        expectRefused({userKeys}, /userKeys must hold at most 100 values, got 101/);
     });
 
     it('combines the action and the path', () => {

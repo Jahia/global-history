@@ -36,12 +36,15 @@
     "accessDenied": "Vous n'avez pas la permission de consulter l'historique de ce site.",
     "filters": {
       "action": "Action",
+      "user": "Utilisateur",
       "dateFrom": "Du",
       "dateTo": "Au",
       "path": "Chemin, par exemple {{example}}",
       "clear": "Effacer les filtres",
+      "clearUsers": "Effacer les utilisateurs sélectionnés",
       "noMatch": "Aucune entrée d'historique ne correspond aux filtres",
       "pathOutsideSite": "Le chemin doit être {{sitePath}} ou un chemin en dessous",
+      "tooManyUsers": "Sélectionnez au plus {{max}} utilisateurs",
       "today": "Aujourd'hui",
       "nextMonth": "Aller au mois suivant",
       "previousMonth": "Aller au mois précédent"

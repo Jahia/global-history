@@ -36,12 +36,15 @@
     "accessDenied": "Sie haben keine Berechtigung, den Verlauf dieser Website anzuzeigen.",
     "filters": {
       "action": "Aktion",
+      "user": "Benutzer",
       "dateFrom": "Von",
       "dateTo": "Bis",
       "path": "Pfad, zum Beispiel {{example}}",
       "clear": "Filter zurücksetzen",
+      "clearUsers": "Ausgewählte Benutzer entfernen",
       "noMatch": "Kein Verlaufseintrag entspricht den Filtern",
       "pathOutsideSite": "Der Pfad muss {{sitePath}} oder ein Pfad darunter sein",
+      "tooManyUsers": "Wählen Sie höchstens {{max}} Benutzer aus",
       "today": "Heute",
       "nextMonth": "Zum nächsten Monat",
       "previousMonth": "Zum vorherigen Monat"

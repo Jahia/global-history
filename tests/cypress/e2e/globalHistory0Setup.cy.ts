@@ -1,6 +1,19 @@
-import {addNode, createSite, deleteSite, deleteUser, publishAndWaitJobEnding, setNodeProperty} from '@jahia/cypress';
+import {
+    addNode,
+    createSite,
+    createUser,
+    deleteSite,
+    deleteUser,
+    grantRoles,
+    publishAndWaitJobEnding,
+    setNodeProperty
+} from '@jahia/cypress';
 import {
     ALL_SITE_KEYS,
+    AUTHOR,
+    AUTHOR_FOLDER,
+    AUTHOR_FOLDER_PATH,
+    AUTHOR_TEXT_COUNT,
     CONTENT_FOLDER,
     CONTENT_FOLDER_PATH,
     EDITOR,
@@ -21,6 +34,7 @@ describe('Global history test suite setup', () => {
     before(() => {
         ALL_SITE_KEYS.forEach(siteKey => deleteSite(siteKey));
         deleteUser(EDITOR.username);
+        deleteUser(AUTHOR.username);
     });
 
     it('creates the sites gh_1, ghx1 and gh_10', () => {
@@ -52,6 +66,26 @@ describe('Global history test suite setup', () => {
         setNodeProperty(TEXT_1_PATH, 'text', 'Text 1, edited before its own publication', 'en');
         publishAndWaitJobEnding(CONTENT_FOLDER_PATH, ['en']);
         nodeUuid(TEXT_1_PATH).then(uuid => waitForAction(CONTENT_FOLDER_PATH, [uuid], 'published'));
+    });
+
+    it('creates content on gh_1 as the editor gh-author', () => {
+        createUser(AUTHOR.username, AUTHOR.password);
+        grantRoles(SITE_PATH, ['editor'], AUTHOR.username, 'USER');
+        cy.apolloClient({username: AUTHOR.username, password: AUTHOR.password});
+        addNode({
+            parentPathOrId: `${SITE_PATH}/contents`,
+            name: AUTHOR_FOLDER,
+            primaryNodeType: 'jnt:contentFolder',
+            children: textNodes(AUTHOR_TEXT_COUNT)
+        }).then((result: AddNodeResult) => {
+            const folder = result.data?.jcr?.addNode;
+            expect(folder?.addChildrenBatch, 'text nodes created by gh-author').to.have.length(AUTHOR_TEXT_COUNT);
+            const uuids = [folder.uuid, ...folder.addChildrenBatch.map(child => child.uuid)];
+
+            // The editor cannot read the history, so root waits for the rows.
+            cy.apolloClient();
+            waitForAction(AUTHOR_FOLDER_PATH, uuids, 'created');
+        });
     });
 
     it('creates content on ghx1 and gh_10 after the content of gh_1', () => {

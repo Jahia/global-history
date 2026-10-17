@@ -22,6 +22,27 @@
   min-width: 1600px;
 }
 
+/* The doubled class outranks the 48px row height of DataTable. A row of 32px keeps room for the thin scrollbar of a long path. */
+.denseRow.denseRow {
+  height: calc(var(--moon-spacing-large) + var(--moon-spacing-small));
+}
+
+/* DataTable passes no class to a header cell, so the header cells get the cell padding through the wrapper. */
+.denseCell.denseCell,
+.tableWrapper th {
+  padding: 0 var(--moon-spacing-small);
+}
+
+/* DataTable renders the pager after the table, inside the scrolling Paper, so the pager sticks to the bottom of the Paper. */
+.stickyPagination {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  background-color: var(--moon-color-white);
+  border-top: 1px solid var(--moon-color-gray_light);
+}
+
 .overlay {
   position: absolute;
   inset: 0;
@@ -81,4 +102,23 @@
 .actionFilter :global(.moonstone-dropdown_tags) {
   flex-wrap: nowrap;
   overflow: hidden;
+}
+
+/* The doubled class outranks the full width and the 58px height of the moonstone cards, so the card fits the row. */
+.userFilter.userFilter {
+  flex: none;
+  width: 200px;
+  height: 32px;
+  min-height: 32px;
+}
+
+.userFilter :global(.moonstone-thumbnail) {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+}
+
+/* A moonstone card caps its name at half its width, and this card lists every selected user on one line. */
+.userFilter :global(.moonstone-cardSelector_displayName) {
+  max-width: none;
 }

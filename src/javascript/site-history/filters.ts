@@ -20,6 +20,7 @@ export const toHistoryFilter = (filters: ColumnFiltersState): HistoryFilterInput
   const [from, to] = filterValue<DateRange>(filters, "date") ?? ["", ""];
   return {
     actions: filterValue<string[]>(filters, "action"),
+    userKeys: filterValue<string[]>(filters, "user"),
     fromTimestamp: from ? dayjs(from).valueOf() : undefined,
     beforeTimestamp: to ? dayjs(to).add(1, "day").valueOf() : undefined,
     path: filterValue<string>(filters, "path"),
