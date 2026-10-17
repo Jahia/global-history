@@ -100,6 +100,8 @@ describe('Site history page', () => {
             expect(paper.scrollHeight, 'height of the rows').to.be.above(paper.clientHeight);
             expect(paper.scrollTop, 'scroll offset on load').to.equal(0);
             expectPagerInView(paper, 'on load');
+            const pager = paper.querySelector('.moonstone-pagination');
+            expect(boxOf(pager).height, 'height of the pager').to.be.closeTo(spacingOf(pager, 'big'), 0.5);
         });
         cy.get(TABLE).scrollTo('center');
         cy.get(TABLE).should($paper => expectPagerInView($paper[0], 'in the middle of the rows'));

@@ -33,8 +33,10 @@
   padding: 0 var(--moon-spacing-small);
 }
 
-/* DataTable renders the pager after the table, inside the scrolling Paper, so the pager sticks to the bottom of the Paper. */
-.stickyPagination {
+/* DataTable renders the pager after the table, inside the scrolling Paper, so the pager sticks to the bottom of the Paper.
+   The doubled class outranks the 64px height of the moonstone pager. */
+.stickyPagination.stickyPagination {
+  height: var(--moon-spacing-big);
   position: sticky;
   bottom: 0;
   left: 0;
