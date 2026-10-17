@@ -9,10 +9,11 @@ import {
   Person,
   type Temporal,
 } from "@jahia/moonstone";
-import type { ColumnFiltersState } from "@tanstack/react-table";
+import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACE } from "../i18n.ts";
+import { ColumnChoice } from "./ColumnChoice.tsx";
 import { ACTION_CONFIG } from "./columns.tsx";
 import { filterValue, type DateRange } from "./filters.ts";
 import styles from "./SiteHistoryApp.module.css";
@@ -237,6 +238,8 @@ const ClearFilters = ({ filters, onClear }: ClearFiltersProps) => {
 };
 
 type HistoryFiltersProps = Readonly<{
+  columns: ReadonlyArray<{ key: string; label: string }>;
+  columnVisibility: VisibilityState;
   filters: ColumnFiltersState;
   pickedUsers: PickedUser[];
   siteKey: string;
@@ -246,9 +249,12 @@ type HistoryFiltersProps = Readonly<{
   onChange: SetFilter;
   onPickUsers: (users: PickedUser[]) => void;
   onClear: () => void;
+  onColumnVisibilityChange: (visibility: VisibilityState) => void;
 }>;
 
 export const HistoryFilters = ({
+  columns,
+  columnVisibility,
   filters,
   pickedUsers,
   siteKey,
@@ -258,6 +264,7 @@ export const HistoryFilters = ({
   onChange,
   onPickUsers,
   onClear,
+  onColumnVisibilityChange,
 }: HistoryFiltersProps) => (
     <div className={styles.filters} data-sel-role="site-history-filters">
         <DateRangeFilter filters={filters} locale={locale} onChange={onChange}/>
@@ -272,5 +279,6 @@ export const HistoryFilters = ({
         <PathFilter filters={filters} sitePath={sitePath} onChange={onChange}/>
         <ActionFilter filters={filters} onChange={onChange}/>
         <ClearFilters filters={filters} onClear={onClear}/>
+        <ColumnChoice columns={columns} visibility={columnVisibility} onChange={onColumnVisibilityChange}/>
     </div>
 );

@@ -28,6 +28,12 @@ export const EDITOR = {username: 'gh-editor', password: 'password123'};
 export const AUTHOR = {username: 'gh-author', password: 'password123'};
 
 export const COLUMN_LABELS = ['Date', 'User', 'Name', 'Property', 'Language', 'Action', 'Path', 'UUID', 'Message'];
+// The table hides these columns until the user shows them.
+export const HIDDEN_BY_DEFAULT = ['UUID', 'Message'];
+export const DEFAULT_COLUMN_LABELS = COLUMN_LABELS.filter(label => !HIDDEN_BY_DEFAULT.includes(label));
+// The local storage key of the column choice, and a value that shows every column.
+export const COLUMNS_STORAGE_KEY = 'globalHistory.columns';
+export const ALL_COLUMNS_SHOWN = JSON.stringify({uuid: true, message: true});
 
 export type HistoryEntry = {
     id: string;

@@ -1,10 +1,11 @@
 import { useQuery, type ApolloError } from "@apollo/client";
 import { Banner, DataTable, EmptyData, Header, LayoutContent, Loader, Paper } from "@jahia/moonstone";
-import type { ColumnFiltersState } from "@tanstack/react-table";
+import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import { i18n, NAMESPACE } from "../i18n.ts";
 import { buildColumns, toRow } from "./columns.tsx";
+import { columnIncludes, isColumnVisible, readColumnVisibility, writeColumnVisibility } from "./columnVisibility.ts";
 import { toHistoryFilter, withColumnFilter } from "./filters.ts";
 import { HistoryFilters, type PickedUser } from "./HistoryFilters.tsx";
 import { SITE_HISTORY_QUERY, type HistoryEntry, type SiteHistoryData, type SiteHistoryVariables } from "./siteHistory.gql.ts";
@@ -23,6 +24,19 @@ const isPathOutsideSite = (error: ApolloError): boolean =>
 const isTooManyUsers = (error: ApolloError): boolean =>
   error.graphQLErrors.some(e => /userKeys must hold at most/.test(e.message ?? ""));
 
+type NoRowsProps = Readonly<{ isLoading: boolean; isFiltered: boolean }>;
+
+const NoRows = ({ isLoading, isFiltered }: NoRowsProps) => {
+  const { t } = useTranslation(NAMESPACE);
+  if (isLoading) {
+    return <Loader size="big"/>;
+  }
+  if (isFiltered) {
+    return <EmptyData message={t("siteHistory.filters.noMatch")} data-sel-role="site-history-no-match"/>;
+  }
+  return <EmptyData message={t("siteHistory.empty")} data-sel-role="site-history-empty"/>;
+};
+
 type SiteHistoryProps = Readonly<{ siteKey: string; language: string }>;
 
 const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
@@ -34,6 +48,7 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   // LayoutContent unmounts the filters while a page loads with no previous rows, so the picked users live here.
   const [pickedUsers, setPickedUsers] = useState<PickedUser[]>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(readColumnVisibility);
   const filter = useMemo(() => toHistoryFilter(columnFilters), [columnFilters]);
   const paperRef = useRef<HTMLElement>(null);
 
@@ -52,6 +67,11 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
     setCurrentPage(1);
   };
 
+  const changeColumnVisibility = (visibility: VisibilityState) => {
+    setColumnVisibility(visibility);
+    writeColumnVisibility(visibility);
+  };
+
   const { data, previousData, loading, error } = useQuery<SiteHistoryData, SiteHistoryVariables>(SITE_HISTORY_QUERY, {
     variables: {
       path: sitePath,
@@ -59,6 +79,7 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
       offset: (currentPage - 1) * itemsPerPage,
       limit: itemsPerPage,
       filter,
+      ...columnIncludes(columnVisibility),
     },
     fetchPolicy: "network-only",
     client: globalThis.jahia?.apolloClient,
@@ -71,6 +92,10 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
   const entries = site?.globalHistory?.entries;
 
   const columns = useMemo(() => buildColumns(t), [t]);
+  const visibleColumns = useMemo(
+    () => columns.filter(column => isColumnVisible(columnVisibility, column.key)),
+    [columns, columnVisibility],
+  );
   const rows = useMemo(
     () => (entries ?? []).filter((e): e is HistoryEntry => e !== null).map(e => toRow(e, uiLanguage)),
     [entries, uiLanguage],
@@ -107,12 +132,10 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
             {errorMessage(error)}
         </Banner>
     );
-  } else if (rows.length === 0 && loading) {
-    content = <Loader size="big"/>;
-  } else if (rows.length === 0 && columnFilters.length > 0) {
-    content = <EmptyData message={t("siteHistory.filters.noMatch")} data-sel-role="site-history-no-match"/>;
+  } else if (visibleColumns.length === 0) {
+    content = <EmptyData message={t("siteHistory.columnChoice.noneVisible")} data-sel-role="site-history-no-column"/>;
   } else if (rows.length === 0) {
-    content = <EmptyData message={t("siteHistory.empty")} data-sel-role="site-history-empty"/>;
+    content = <NoRows isLoading={loading} isFiltered={columnFilters.length > 0}/>;
   } else {
     content = (
         <div className={styles.tableArea}>
@@ -121,7 +144,7 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
           enablePagination
           primaryKey="id"
           data={rows}
-          columns={columns}
+          columns={visibleColumns}
           enableSorting={false}
           currentPage={currentPage}
           itemsPerPage={itemsPerPage}
@@ -158,6 +181,8 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
       header={<Header title={t("siteHistory.title", { siteName })}/>}
       >
           <HistoryFilters
+          columns={columns}
+          columnVisibility={columnVisibility}
           filters={columnFilters}
           pickedUsers={pickedUsers}
           siteKey={siteKey}
@@ -167,6 +192,7 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
           onChange={setFilter}
           onPickUsers={setPickedUsers}
           onClear={clearFilters}
+          onColumnVisibilityChange={changeColumnVisibility}
         />
           {content}
       </LayoutContent>

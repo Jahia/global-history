@@ -52,6 +52,14 @@
     "pagination": {
       "itemsPerPage": "Zeilen pro Seite",
       "of": "von"
+    },
+    "columnChoice": {
+      "button": "Spalten auswählen",
+      "visible": "Sichtbare Spalten",
+      "hidden": "Ausgeblendete Spalten",
+      "close": "Schließen",
+      "noMatch": "Keine Spalte entspricht der Suche",
+      "noneVisible": "Alle Spalten sind ausgeblendet. Blenden Sie eine Spalte ein, um den Verlauf zu sehen."
     }
   }
 }
