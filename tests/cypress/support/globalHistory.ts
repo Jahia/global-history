@@ -11,14 +11,23 @@ export const CONTENT_FOLDER = 'gh-content';
 export const CONTENT_FOLDER_PATH = `${SITE_PATH}/contents/${CONTENT_FOLDER}`;
 export const TEXT_COUNT = 12;
 export const TEXT_1_PATH = `${CONTENT_FOLDER_PATH}/text-1`;
+export const AUTHOR_FOLDER = 'gh-author-content';
+export const AUTHOR_FOLDER_PATH = `${SITE_PATH}/contents/${AUTHOR_FOLDER}`;
+export const AUTHOR_TEXT_COUNT = 2;
 
 export const MAX_LIMIT = 100;
-export const PAGE_SIZE = 20;
+// The limit of the GraphQL field when the request sets none.
+export const DEFAULT_LIMIT = 20;
+// The rows on one page of the Site history table, and the choices of its page size.
+export const PAGE_SIZE = 100;
+export const PAGE_SIZE_OPTIONS = ['20', '50', '100'];
 export const HISTORY_TIMEOUT = 60000;
 
 export const EDITOR = {username: 'gh-editor', password: 'password123'};
+// The second user with rows on gh_1, for the user filter.
+export const AUTHOR = {username: 'gh-author', password: 'password123'};
 
-export const COLUMN_LABELS = ['Date', 'User', 'Action', 'Name', 'Property', 'Language', 'Path', 'UUID', 'Message'];
+export const COLUMN_LABELS = ['Date', 'User', 'Name', 'Property', 'Language', 'Action', 'Path', 'UUID', 'Message'];
 
 export type HistoryEntry = {
     id: string;
@@ -41,6 +50,7 @@ export type GlobalHistory = {
 
 export type HistoryFilter = {
     actions?: string[];
+    userKeys?: string[];
     fromTimestamp?: number;
     beforeTimestamp?: number;
     path?: string;

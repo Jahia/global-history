@@ -40,6 +40,7 @@ export type SiteHistoryData = {
 
 export type HistoryFilterInput = {
   actions?: string[];
+  userKeys?: string[];
   fromTimestamp?: number;
   beforeTimestamp?: number;
   path?: string;

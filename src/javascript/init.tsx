@@ -5,10 +5,13 @@ import { i18n, NAMESPACE } from "./i18n.ts";
 
 const SiteHistoryApp = lazy(() => import("./site-history/SiteHistoryApp.tsx"));
 
-type RouteProps = { match?: { params?: { siteKey?: string } } };
+type RouteProps = { match?: { params?: { siteKey?: string; lang?: string } } };
 
 const siteKeyOf = (props: RouteProps): string =>
   props?.match?.params?.siteKey ?? globalThis.jahia?.reduxStore?.getState().site ?? "";
+
+const languageOf = (props: RouteProps): string =>
+  props?.match?.params?.lang ?? globalThis.jahia?.reduxStore?.getState().language ?? "";
 
 export default function registerGlobalHistory() {
   registry.add("callback", "global-history", {
@@ -26,7 +29,7 @@ export default function registerGlobalHistory() {
           const siteKey = siteKeyOf(props);
           return (
               <Suspense fallback={null}>
-                  <SiteHistoryApp key={siteKey} siteKey={siteKey}/>
+                  <SiteHistoryApp key={siteKey} siteKey={siteKey} language={languageOf(props)}/>
               </Suspense>
           );
         },

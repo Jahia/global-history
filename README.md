@@ -30,16 +30,16 @@ The GraphQL field checks `viewHistoryTab` on the node it is called on. A user wi
 
 ## Columns
 
-The table has 9 columns and shows the newest row first. You can show 20, 50 or 100 rows on a page.
+The table has 9 columns and shows the newest row first. A page shows 100 rows, and you can choose 20 or 50 rows instead. The pager stays at the bottom of the table while you scroll the rows, and a new page opens on its first row.
 
 | Column | Content |
 |---|---|
 | Date | The date of the action, in the date format of the UI language. The module formats dates in English, French and German, and it uses English for any other UI language. |
 | User | The first name and the last name of the user, or the user name when the names are empty. |
-| Action | The action as a chip, for example Created, Modified, Published or Accessed. An unknown action shows as plain text. |
 | Name | The display name of the node and its system name. The cell shows a dash when the node no longer exists or the user cannot read it. |
 | Property | The label and the name of the property, on a property row only. |
 | Language | The language of a row on a translation node or an i18n property, in upper case, for example `EN`. Other rows show a globe icon. |
+| Action | The action as a chip, for example Created, Modified, Published or Accessed. An unknown action shows as plain text. |
 | Path | The path of the node at the time of the action. A tooltip shows a long path in full. |
 | UUID | The identifier of the node. |
 | Message | The workspaces of a publication, for example `default;;live`. |
@@ -79,6 +79,7 @@ query {
 | Field | Rows that match |
 |---|---|
 | `actions` | The action is one of these values. The list holds at most 20 values. |
+| `userKeys` | The user name is one of these values. The module drops a blank value and a duplicate, and a list of more than 100 values returns an error. |
 | `fromTimestamp` | The date is at or after this time, in milliseconds since epoch. |
 | `beforeTimestamp` | The date is before this time, in milliseconds since epoch. |
 | `path` | The path is this path or a path below it. A path outside the node returns an error. A path with `[` or `]` returns an error too. |
@@ -116,11 +117,15 @@ The variables of this query list the published rows of `/sites/digitall/home` si
 - Jahia records the `default` workspace only. An edit made in the `live` workspace leaves no row.
 - A site that is deleted and created again with the same key shows the rows of the old site until the purge deletes them.
 - When a whole site is published for the first time, Jahia writes a `published` row for the site node only. A node that changes later gets its own `published` row when it is published again.
-- No database index covers the path column or the action column, so a count reads the whole history table. On Jahia 8.2.4 and newer, a count with a date filter reads only the rows of its date range, through the date index.
+- No database index covers the path column, the action column or the user column, so a count reads the whole history table. On Jahia 8.2.4 and newer, a count with a date filter reads only the rows of its date range, through the date index.
 - The first page of a site with few rows reads most of the date index. A filter that matches few rows has the same cost on any site. Jahia 8.2.3 and older have no date index.
+- The User filter opens the user picker of jContent, and the picker lists the existing users only. The rows of a deleted user stay in the table, but the User filter cannot select that user.
+- The user column holds the user name without its realm. A site user and a global user with the same user name share their rows.
+- MySQL, MariaDB and SQL Server often compare the user names without case. On these databases, `userKeys: ["jdoe"]` also selects the rows of the user `JDoe`.
+- The User filter calls `window.CE_API.openPicker`, which jContent sets and the Jahia Academy does not document. The page hides the User filter when jContent does not set this function.
 - The page of the module asks for `totalCount` and `entries` in one request. On a site with few rows, or with a filter that matches no row, this request took up to 7.3 seconds.
 
-The table gives the worst time of one GraphQL request with 2,000,000 rows on MariaDB and Jahia 8.2.4. The rows have 5 actions in 10 folders, and the date filter covers 24 hours.
+The table gives the worst time of one GraphQL request with 2,000,000 rows on MariaDB and Jahia 8.2.4. The rows have 5 actions, 10 folders and 200 users, and the date filter covers 24 hours.
 
 | Filter | `totalCount` | `entries(limit: 20)` |
 |---|---|---|
@@ -129,6 +134,12 @@ The table gives the worst time of one GraphQL request with 2,000,000 rows on Mar
 | `path` | 2.1 s | 6.2 s |
 | `fromTimestamp` and `beforeTimestamp` | 0.17 s | 0.12 s |
 | `actions`, the dates and `path` | 0.17 s | 0.11 s |
+| `userKeys`, 1 user with rows | 1.5 s | 0.14 s |
+| `userKeys`, 5 users with rows | 1.4 s | 0.064 s |
+| `userKeys`, 1 user with no row | 1.5 s | 4.4 s |
+| `userKeys` and the dates | 0.15 s | 0.091 s |
+
+The `userKeys` rows come from a later run with the same seed. In that run, a request with no filter took 1.5 s for `totalCount` and 4.4 s for `entries(limit: 20)`.
 
 ## Database support
 

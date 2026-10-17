@@ -1,8 +1,8 @@
 import {
     GlobalHistory,
     historyPage,
+    DEFAULT_LIMIT,
     MAX_LIMIT,
-    PAGE_SIZE,
     SITE_PATH,
     waitForStableTotal
 } from '../support/globalHistory';
@@ -65,7 +65,7 @@ describe('globalHistory pagination', () => {
 
     it('defaults the limit to 20 and clamps it to 100', () => {
         historyPage(SITE_PATH, 0, null).then(page => {
-            expect(page.entries, 'rows without a limit').to.have.length(Math.min(PAGE_SIZE, total));
+            expect(page.entries, 'rows without a limit').to.have.length(Math.min(DEFAULT_LIMIT, total));
         });
         historyPage(SITE_PATH, 0, 1000).then(page => {
             expect(page.entries, 'rows for limit 1000').to.have.length(Math.min(MAX_LIMIT, total));

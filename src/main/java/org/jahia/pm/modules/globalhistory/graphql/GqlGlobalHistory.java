@@ -73,10 +73,10 @@ public class GqlGlobalHistory {
 
     private HistoryFilter historyFilter(GqlGlobalHistoryFilter filter) {
         if (filter == null) {
-            return HistoryFilter.of(node.getPath(), null, null, null, null);
+            return HistoryFilter.of(node.getPath(), null, null, null, null, null);
         }
-        return HistoryFilter.of(node.getPath(), filter.getPath(), filter.getActions(), filter.getFromTimestamp(),
-                filter.getBeforeTimestamp());
+        return HistoryFilter.of(node.getPath(), filter.getPath(), filter.getActions(), filter.getUserKeys(),
+                filter.getFromTimestamp(), filter.getBeforeTimestamp());
     }
 
     private static <T> T validInput(Supplier<T> input) {

@@ -103,8 +103,12 @@ public enum HistoryDialect {
         List<Object> parameters = new ArrayList<>(HistoryPaths.likePatterns(filter.getPath()));
         conditions.add(pathCondition());
         if (!filter.getActions().isEmpty()) {
-            conditions.add("entry_action IN (" + String.join(", ", Collections.nCopies(filter.getActions().size(), "?")) + ")");
+            conditions.add(inCondition("entry_action", filter.getActions().size()));
             parameters.addAll(filter.getActions());
+        }
+        if (!filter.getUserKeys().isEmpty()) {
+            conditions.add(inCondition("user_key", filter.getUserKeys().size()));
+            parameters.addAll(filter.getUserKeys());
         }
         if (filter.getFromTimestamp() != null) {
             conditions.add("entry_date >= ?");
@@ -115,6 +119,10 @@ public enum HistoryDialect {
             parameters.add(filter.getBeforeTimestamp());
         }
         return new HistorySql(String.join(" AND ", conditions), parameters);
+    }
+
+    private static String inCondition(String column, int valueCount) {
+        return column + " IN (" + String.join(", ", Collections.nCopies(valueCount, "?")) + ")";
     }
 
     private String pathCondition() {

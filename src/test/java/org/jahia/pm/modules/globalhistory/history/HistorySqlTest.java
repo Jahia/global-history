@@ -35,7 +35,7 @@ class HistorySqlTest {
     @MethodSource("dialects")
     void dialectWritesTheSqlOfItsVendor(HistoryDialect dialect, String path, String like, String pagination,
             List<Object> paginationParameters) {
-        HistoryFilter noFilter = HistoryFilter.of(SCOPE, null, null, null, null);
+        HistoryFilter noFilter = HistoryFilter.of(SCOPE, null, null, null, null, null);
         String condition = path + " " + like + " ? ESCAPE '!'";
         String where = " WHERE (" + condition + " OR " + condition + ")";
 
@@ -51,19 +51,35 @@ class HistorySqlTest {
         assertEquals(parameters, page.getParameters());
 
         HistoryFilter everyFilter = HistoryFilter.of(SCOPE, "/sites/gh_1/contents", asList("created", "", null, "published"),
-                1790805600000L, 1792101600000L);
+                asList("root", "gh-author"), 1790805600000L, 1792101600000L);
         HistorySql filteredCount = dialect.countSql(everyFilter);
         assertEquals("SELECT COUNT(*) FROM jahia_contenthistory" + where
-                + " AND entry_action IN (?, ?) AND entry_date >= ? AND entry_date < ?", filteredCount.getText());
-        assertEquals(asList("/sites/gh!_1/contents", "/sites/gh!_1/contents/%", "created", "published", 1790805600000L,
-                1792101600000L), filteredCount.getParameters());
+                + " AND entry_action IN (?, ?) AND user_key IN (?, ?) AND entry_date >= ? AND entry_date < ?",
+                filteredCount.getText());
+        assertEquals(asList("/sites/gh!_1/contents", "/sites/gh!_1/contents/%", "created", "published", "root", "gh-author",
+                1790805600000L, 1792101600000L), filteredCount.getParameters());
     }
 
     @Test
     void pathFilterReplacesTheScope() {
         assertEquals(asList("/sites/gh!_1/contents/a!_b", "/sites/gh!_1/contents/a!_b/%"),
-                HistoryDialect.DERBY.where(HistoryFilter.of(SCOPE, "/sites/gh_1/contents/a_b//", null, null, null)).getParameters());
-        assertEquals(SCOPE_PATTERNS, HistoryDialect.DERBY.where(HistoryFilter.of("/", SCOPE, null, null, null)).getParameters());
+                HistoryDialect.DERBY.where(HistoryFilter.of(SCOPE, "/sites/gh_1/contents/a_b//", null, null, null, null)).getParameters());
+        assertEquals(SCOPE_PATTERNS, HistoryDialect.DERBY.where(HistoryFilter.of("/", SCOPE, null, null, null, null)).getParameters());
+    }
+
+    @Test
+    void userFilterBindsOneValuePerKey() {
+        assertUserCondition(asList("gh-author"), "user_key IN (?)", asList("gh-author"));
+        assertUserCondition(asList("root", "gh-author", "jdoe"), "user_key IN (?, ?, ?)", asList("root", "gh-author", "jdoe"));
+    }
+
+    @Test
+    void userFilterDropsBlankKeysAndDuplicates() {
+        assertUserCondition(asList("root", "", null, "  ", "gh-author"), "user_key IN (?, ?)", asList("root", "gh-author"));
+        assertUserCondition(asList("gh-author", "root", "gh-author"), "user_key IN (?, ?)", asList("gh-author", "root"));
+        HistorySql blankKeysOnly = userWhere(asList("", null, " "));
+        assertEquals(userWhere(null).getText(), blankKeysOnly.getText());
+        assertEquals(SCOPE_PATTERNS, blankKeysOnly.getParameters());
     }
 
     @Test
@@ -76,5 +92,18 @@ class HistorySqlTest {
     @Test
     void likePatternsAreTheEscapedPathAndThePathsBelowIt() {
         assertEquals(asList("/sites/gh!_1", "/sites/gh!_1/%"), HistoryPaths.likePatterns("/sites/gh_1"));
+    }
+
+    private static HistorySql userWhere(List<String> userKeys) {
+        return HistoryDialect.DERBY.where(HistoryFilter.of(SCOPE, null, null, userKeys, null, null));
+    }
+
+    private static void assertUserCondition(List<String> userKeys, String condition, List<String> boundKeys) {
+        HistorySql where = userWhere(userKeys);
+        String pathCondition = "entry_path LIKE ? ESCAPE '!'";
+        assertEquals("(" + pathCondition + " OR " + pathCondition + ") AND " + condition, where.getText());
+        List<Object> parameters = new ArrayList<>(SCOPE_PATTERNS);
+        parameters.addAll(boundKeys);
+        assertEquals(parameters, where.getParameters());
     }
 }

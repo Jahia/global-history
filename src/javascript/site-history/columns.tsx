@@ -77,28 +77,40 @@ export const toRow = (entry: HistoryEntry, uiLanguage: string): HistoryTableRow 
   propertyName: entry.propertyName ?? "",
 });
 
-const ellipsis = (text: string) => <Typography isNowrap component="span" title={text}>{text}</Typography>;
+const caption = (text: string) => <Typography component="span" variant="caption">{text}</Typography>;
+
+const ellipsis = (text: string) => (
+    <Typography isNowrap component="span" variant="caption" title={text}>
+        {text}
+    </Typography>
+);
 
 const scrollFromEnd = (text: string) => (
-    <div className={styles.scrollFromEnd} title={text}>
+    <Typography component="div" variant="caption" className={styles.scrollFromEnd} title={text}>
         <bdi dir="ltr">{text}</bdi>
-    </div>
+    </Typography>
 );
 
 const withTechnicalName = (label: string, technicalName: string) => (
-    <Typography isNowrap component="span" title={technicalName && technicalName !== label ? `${label} (${technicalName})` : label}>
+    <Typography
+    isNowrap
+    component="span"
+    variant="caption"
+    title={technicalName && technicalName !== label ? `${label} (${technicalName})` : label}
+    >
         {label}
         {technicalName && technicalName !== label && (
-            <Typography component="span" className={styles.secondary}> ({technicalName})</Typography>
+            <Typography component="span" variant="caption" className={styles.secondary}> ({technicalName})</Typography>
         )}
     </Typography>
 );
 
-export const buildColumns = (t: Translate): DataTableColumn<HistoryTableRow>[] => [
+const columnDefinitions = (t: Translate): DataTableColumn<HistoryTableRow>[] => [
   {
     key: "date",
     label: t("siteHistory.columns.date"),
     width: "190px",
+    render: ({ value }) => caption(value as string),
   },
   {
     key: "user",
@@ -107,23 +119,9 @@ export const buildColumns = (t: Translate): DataTableColumn<HistoryTableRow>[] =
     render: ({ value }) => ellipsis(value as string),
   },
   {
-    key: "action",
-    label: t("siteHistory.columns.action"),
-    width: "130px",
-    render: ({ value }) => {
-      const action = value as string;
-      const config = ACTION_CONFIG[action];
-      if (!config) {
-        return action;
-      }
-      const Icon = config.icon;
-      return <Chip label={t(`siteHistory.actions.${action}`)} icon={<Icon/>} color={config.color}/>;
-    },
-  },
-  {
     key: "name",
     label: t("siteHistory.columns.name"),
-    render: ({ data }) => (data.nodeExists ? withTechnicalName(data.name, data.systemName) : NO_NODE),
+    render: ({ data }) => (data.nodeExists ? withTechnicalName(data.name, data.systemName) : caption(NO_NODE)),
   },
   {
     key: "property",
@@ -137,6 +135,20 @@ export const buildColumns = (t: Translate): DataTableColumn<HistoryTableRow>[] =
     width: "90px",
     align: "center",
     render: ({ value }) => (value ? <Pill>{(value as string).toUpperCase()}</Pill> : <Language/>),
+  },
+  {
+    key: "action",
+    label: t("siteHistory.columns.action"),
+    width: "130px",
+    render: ({ value }) => {
+      const action = value as string;
+      const config = ACTION_CONFIG[action];
+      if (!config) {
+        return caption(action);
+      }
+      const Icon = config.icon;
+      return <Chip label={t(`siteHistory.actions.${action}`)} icon={<Icon/>} color={config.color}/>;
+    },
   },
   {
     key: "path",
@@ -158,3 +170,6 @@ export const buildColumns = (t: Translate): DataTableColumn<HistoryTableRow>[] =
     render: ({ value }) => ellipsis(value as string),
   },
 ];
+
+export const buildColumns = (t: Translate): DataTableColumn<HistoryTableRow>[] =>
+  columnDefinitions(t).map(column => ({ ...column, cellProps: { className: styles.denseCell } }));

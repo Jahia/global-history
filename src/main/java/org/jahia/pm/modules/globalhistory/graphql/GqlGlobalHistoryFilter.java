@@ -15,6 +15,10 @@ public class GqlGlobalHistoryFilter {
     private final List<String> actions;
 
     @GraphQLField
+    @GraphQLDescription("Rows whose user key is one of these user names, at most 100 values")
+    private final List<String> userKeys;
+
+    @GraphQLField
     @GraphQLDescription("Rows dated at or after this time, in milliseconds since epoch")
     private final Long fromTimestamp;
 
@@ -27,10 +31,12 @@ public class GqlGlobalHistoryFilter {
     private final String path;
 
     public GqlGlobalHistoryFilter(@GraphQLName("actions") List<String> actions,
+                                  @GraphQLName("userKeys") List<String> userKeys,
                                   @GraphQLName("fromTimestamp") Long fromTimestamp,
                                   @GraphQLName("beforeTimestamp") Long beforeTimestamp,
                                   @GraphQLName("path") String path) {
         this.actions = actions;
+        this.userKeys = userKeys;
         this.fromTimestamp = fromTimestamp;
         this.beforeTimestamp = beforeTimestamp;
         this.path = path;
@@ -38,6 +44,10 @@ public class GqlGlobalHistoryFilter {
 
     public List<String> getActions() {
         return actions;
+    }
+
+    public List<String> getUserKeys() {
+        return userKeys;
     }
 
     public Long getFromTimestamp() {

@@ -1,16 +1,18 @@
 import { useQuery, type ApolloError } from "@apollo/client";
 import { Banner, DataTable, EmptyData, Header, LayoutContent, Loader, Paper } from "@jahia/moonstone";
 import type { ColumnFiltersState } from "@tanstack/react-table";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import { i18n, NAMESPACE } from "../i18n.ts";
 import { buildColumns, toRow } from "./columns.tsx";
 import { toHistoryFilter, withColumnFilter } from "./filters.ts";
-import { HistoryFilters } from "./HistoryFilters.tsx";
+import { HistoryFilters, type PickedUser } from "./HistoryFilters.tsx";
 import { SITE_HISTORY_QUERY, type HistoryEntry, type SiteHistoryData, type SiteHistoryVariables } from "./siteHistory.gql.ts";
 import styles from "./SiteHistoryApp.module.css";
 
 const ITEMS_PER_PAGE_OPTIONS = [20, 50, 100];
+const DEFAULT_ITEMS_PER_PAGE = 100;
+const MAX_USERS = 100;
 
 const isAccessDenied = (error: ApolloError): boolean =>
   error.graphQLErrors.some(e => /AccessDenied|permission/i.test(e.message ?? ""));
@@ -18,16 +20,27 @@ const isAccessDenied = (error: ApolloError): boolean =>
 const isPathOutsideSite = (error: ApolloError): boolean =>
   error.graphQLErrors.some(e => /path must be/.test(e.message ?? ""));
 
-type SiteHistoryProps = Readonly<{ siteKey: string }>;
+const isTooManyUsers = (error: ApolloError): boolean =>
+  error.graphQLErrors.some(e => /userKeys must hold at most/.test(e.message ?? ""));
 
-const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
+type SiteHistoryProps = Readonly<{ siteKey: string; language: string }>;
+
+const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
   const { t } = useTranslation(NAMESPACE);
   const uiLanguage = globalThis.contextJsParameters?.uilang ?? "en";
   const sitePath = `/sites/${siteKey}`;
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0]);
+  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  // LayoutContent unmounts the filters while a page loads with no previous rows, so the picked users live here.
+  const [pickedUsers, setPickedUsers] = useState<PickedUser[]>([]);
   const filter = useMemo(() => toHistoryFilter(columnFilters), [columnFilters]);
+  const paperRef = useRef<HTMLElement>(null);
+
+  // The Paper stays mounted on a new page, so without this reset the page opens at the scroll offset of the old one.
+  useEffect(() => {
+    paperRef.current?.scrollTo({ top: 0 });
+  }, [currentPage, itemsPerPage, filter]);
 
   const setFilter = (id: string, value: unknown) => {
     setColumnFilters(old => withColumnFilter(old, id, value));
@@ -78,6 +91,9 @@ const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
     if (isPathOutsideSite(apolloError)) {
       return t("siteHistory.filters.pathOutsideSite", { sitePath, interpolation: { escapeValue: false } });
     }
+    if (isTooManyUsers(apolloError)) {
+      return t("siteHistory.filters.tooManyUsers", { max: MAX_USERS });
+    }
     if (isAccessDenied(apolloError)) {
       return t("siteHistory.accessDenied");
     }
@@ -100,7 +116,7 @@ const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
   } else {
     content = (
         <div className={styles.tableArea}>
-            <Paper hasPadding={false} className={styles.tableWrapper} aria-busy={loading} data-sel-role="site-history-table">
+            <Paper ref={paperRef} hasPadding={false} className={styles.tableWrapper} aria-busy={loading} data-sel-role="site-history-table">
                 <DataTable
           enablePagination
           primaryKey="id"
@@ -111,6 +127,8 @@ const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
           itemsPerPage={itemsPerPage}
           itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
           totalItems={totalItems}
+          rowProps={{ className: styles.denseRow }}
+          paginationProps={{ className: styles.stickyPagination }}
           i18n={{
             itemsPerPage: t("siteHistory.pagination.itemsPerPage"),
             of: t("siteHistory.pagination.of"),
@@ -141,9 +159,13 @@ const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
       >
           <HistoryFilters
           filters={columnFilters}
+          pickedUsers={pickedUsers}
+          siteKey={siteKey}
           sitePath={sitePath}
+          language={language}
           locale={uiLanguage}
           onChange={setFilter}
+          onPickUsers={setPickedUsers}
           onClear={clearFilters}
         />
           {content}
@@ -151,9 +173,9 @@ const SiteHistory = ({ siteKey }: SiteHistoryProps) => {
   );
 };
 
-const SiteHistoryApp = ({ siteKey }: SiteHistoryProps) => (
+const SiteHistoryApp = ({ siteKey, language }: SiteHistoryProps) => (
     <I18nextProvider i18n={i18n} defaultNS={NAMESPACE}>
-        <SiteHistory siteKey={siteKey}/>
+        <SiteHistory siteKey={siteKey} language={language}/>
     </I18nextProvider>
 );
 
