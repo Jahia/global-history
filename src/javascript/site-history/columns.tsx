@@ -86,16 +86,17 @@ const ellipsis = (text: string) => (
 );
 
 const scrollFromEnd = (text: string) => (
-    <Typography component="div" variant="caption" className={styles.scrollFromEnd} title={text}>
+    <Typography component="div" variant="caption" className={`${styles.scrollable} ${styles.scrollFromEnd}`} title={text}>
         <bdi dir="ltr">{text}</bdi>
     </Typography>
 );
 
-const withTechnicalName = (label: string, technicalName: string) => (
+const withTechnicalName = (label: string, technicalName: string, isScrollable = false) => (
     <Typography
-    isNowrap
-    component="span"
+    isNowrap={!isScrollable}
+    component={isScrollable ? "div" : "span"}
     variant="caption"
+    className={isScrollable ? styles.scrollable : undefined}
     title={technicalName && technicalName !== label ? `${label} (${technicalName})` : label}
     >
         {label}
@@ -121,7 +122,8 @@ const columnDefinitions = (t: Translate): DataTableColumn<HistoryTableRow>[] => 
   {
     key: "name",
     label: t("siteHistory.columns.name"),
-    render: ({ data }) => (data.nodeExists ? withTechnicalName(data.name, data.systemName) : caption(NO_NODE)),
+    width: "300px",
+    render: ({ data }) => (data.nodeExists ? withTechnicalName(data.name, data.systemName, true) : caption(NO_NODE)),
   },
   {
     key: "property",

@@ -1,6 +1,6 @@
 import {
     AUTHOR,
-    COLUMN_LABELS,
+    DEFAULT_COLUMN_LABELS,
     historyTotal,
     isInScope,
     PAGE_SIZE,
@@ -25,7 +25,8 @@ const USER_FILTER_CLEAR = '[data-sel-role="filter-user-clear"]';
 const USER_FILTER_EMPTY = `${USER_FILTER} [data-testid="emptyCardSelector-label"]`;
 const USER_FILTER_NAME = `${USER_FILTER} [data-testid="cardSelector-displayName"]`;
 const CLEAR_FILTERS = '[data-sel-role="filter-clear"]';
-const FILTER_CONTROLS = [DATE_FROM, DATE_TO, USER_FILTER, PATH_FILTER, ACTION_FILTER, CLEAR_FILTERS];
+const COLUMN_CHOICE = '[data-sel-role="column-choice"]';
+const FILTER_CONTROLS = [DATE_FROM, DATE_TO, USER_FILTER, PATH_FILTER, ACTION_FILTER, CLEAR_FILTERS, COLUMN_CHOICE];
 const PICKER = '[data-sel-role="picker-dialog"][data-sel-type="user"]';
 const PICKER_SEARCH = `${PICKER} input[role="searchbox"]`;
 const PICKER_SELECTION = `${PICKER} [data-cm-role="selection-caption"]`;
@@ -37,7 +38,7 @@ const UI_LOCALE = 'en';
 const textsOf = ($elements: JQuery<HTMLElement>) =>
     Cypress.$.makeArray($elements).map(element => (element.textContent ?? '').trim());
 
-const cellsOf = (columnLabel: string) => `${ROWS} td:nth-child(${COLUMN_LABELS.indexOf(columnLabel) + 1})`;
+const cellsOf = (columnLabel: string) => `${ROWS} td:nth-child(${DEFAULT_COLUMN_LABELS.indexOf(columnLabel) + 1})`;
 
 const boxOf = (element: HTMLElement): DOMRect => element.getBoundingClientRect();
 
@@ -102,7 +103,7 @@ describe('Site history filters', () => {
         cy.get(CLEAR_FILTERS).should('be.disabled');
     });
 
-    it('shows the six controls in one row between the header and the table', () => {
+    it('shows the six controls and the column choice in one row between the header and the table', () => {
         cy.get(`${PAGE} header`).find(FILTER_CONTROLS.join(', ')).should('not.exist');
         cy.get(FILTERS).should($filters => {
             const filters = boxOf($filters[0]);
@@ -119,7 +120,10 @@ describe('Site history filters', () => {
                     2
                 );
             });
-            expect(controls[controls.length - 1].right, 'right edge of Clear filters').to.be.closeTo(filters.right, 1);
+            expect(controls[controls.length - 1].right, 'right edge of the column choice').to.be.closeTo(
+                filters.right,
+                1
+            );
         });
     });
 
