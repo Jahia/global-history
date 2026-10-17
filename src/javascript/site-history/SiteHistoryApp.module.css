@@ -17,7 +17,7 @@
   overflow: auto;
 }
 
-/* DataTable rows wrap once the fixed column widths exceed the row, so the table keeps room for the fluid Name and Path columns. */
+/* DataTable rows wrap once the fixed column widths exceed the row, so the table keeps room for the fluid Path column. */
 .tableWrapper table {
   min-width: 1600px;
 }
@@ -63,13 +63,17 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-/* direction: rtl starts the scroll at the right end, so the cell opens on the end of the path. The bdi inside keeps the path left to right. */
-.scrollFromEnd {
+/* A long name or path scrolls inside its cell instead of being cut. */
+.scrollable {
   min-width: 0;
   overflow-x: auto;
-  direction: rtl;
   white-space: nowrap;
   scrollbar-width: thin;
+}
+
+/* direction: rtl starts the scroll at the right end, so the cell opens on the end of the path. The bdi inside keeps the path left to right. */
+.scrollFromEnd {
+  direction: rtl;
 }
 
 .filters {
@@ -89,6 +93,18 @@
 
 .clearFilters {
   margin-left: auto;
+}
+
+/* A flex box drops the line box of an inline span, so the button sits in the middle of the filter row. */
+.columnChoice {
+  display: flex;
+}
+
+.columnChoiceFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--moon-spacing-small);
+  border-top: 1px solid var(--moon-color-gray_light);
 }
 
 /* The doubled class outranks the width: 100% that moonstone gives every Input. */

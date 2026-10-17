@@ -32,11 +32,13 @@ The GraphQL field checks `viewHistoryTab` on the node it is called on. A user wi
 
 The table has 9 columns and shows the newest row first. A page shows 100 rows, and you can choose 20 or 50 rows instead. The pager stays at the bottom of the table while you scroll the rows, and a new page opens on its first row.
 
+The column button at the right end of the filter row lists the visible columns and the hidden columns, and a click on a column shows or hides it. The UUID and Message columns are hidden until you show them. The browser keeps the choice in its local storage under the key `globalHistory.columns`, so another browser shows the default columns. The page query skips the fields of a hidden column, so a hidden User, Name or Property column saves a lookup per row.
+
 | Column | Content |
 |---|---|
 | Date | The date of the action, in the date format of the UI language. The module formats dates in English, French and German, and it uses English for any other UI language. |
 | User | The first name and the last name of the user, or the user name when the names are empty. |
-| Name | The display name of the node and its system name. The cell shows a dash when the node no longer exists or the user cannot read it. |
+| Name | The display name of the node and its system name. A long name scrolls inside the cell. The cell shows a dash when the node no longer exists or the user cannot read it. |
 | Property | The label and the name of the property, on a property row only. |
 | Language | The language of a row on a translation node or an i18n property, in upper case, for example `EN`. Other rows show a globe icon. |
 | Action | The action as a chip, for example Created, Modified, Published or Accessed. An unknown action shows as plain text. |

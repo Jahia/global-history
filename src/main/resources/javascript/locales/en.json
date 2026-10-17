@@ -52,6 +52,14 @@
     "pagination": {
       "itemsPerPage": "Rows per page",
       "of": "of"
+    },
+    "columnChoice": {
+      "button": "Choose the columns",
+      "visible": "Visible columns",
+      "hidden": "Hidden columns",
+      "close": "Close",
+      "noMatch": "No column matches the search",
+      "noneVisible": "All columns are hidden. Show a column to see the history."
     }
   }
 }
