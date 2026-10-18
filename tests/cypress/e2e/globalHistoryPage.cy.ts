@@ -1,5 +1,7 @@
 import {
+    ALL_COLUMNS_SHOWN,
     COLUMN_LABELS,
+    COLUMNS_STORAGE_KEY,
     PAGE_SIZE,
     PAGE_SIZE_OPTIONS,
     SITE_KEY,
@@ -51,9 +53,12 @@ describe('Site history page', () => {
         });
     });
 
+    // The page shows every column, so each column gets its checks.
     beforeEach(() => {
         cy.login();
-        cy.visit(`/jahia/jcontent/${SITE_KEY}/en/apps/siteHistory`);
+        cy.visit(`/jahia/jcontent/${SITE_KEY}/en/apps/siteHistory`, {
+            onBeforeLoad: win => win.localStorage.setItem(COLUMNS_STORAGE_KEY, ALL_COLUMNS_SHOWN)
+        });
     });
 
     it('shows the header, the nine columns and the first page of rows', () => {

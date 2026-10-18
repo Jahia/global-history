@@ -52,6 +52,14 @@
     "pagination": {
       "itemsPerPage": "Lignes par page",
       "of": "de"
+    },
+    "columnChoice": {
+      "button": "Choisir les colonnes",
+      "visible": "Colonnes visibles",
+      "hidden": "Colonnes masquées",
+      "close": "Fermer",
+      "noMatch": "Aucune colonne ne correspond à la recherche",
+      "noneVisible": "Toutes les colonnes sont masquées. Affichez une colonne pour voir l'historique."
     }
   }
 }
