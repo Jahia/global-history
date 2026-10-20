@@ -26,6 +26,8 @@ export const HISTORY_TIMEOUT = 60000;
 export const EDITOR = {username: 'gh-editor', password: 'password123'};
 // The second user with rows on gh_1, for the user filter.
 export const AUTHOR = {username: 'gh-author', password: 'password123'};
+// A site administrator of gh_1 and an editor of ghx1, for the permission on another site.
+export const SITE_ADMIN = {username: 'gh-site-admin', password: 'password123'};
 
 // The column menu names each column, and the header of the Locate column is empty.
 export const COLUMN_LABELS = [
