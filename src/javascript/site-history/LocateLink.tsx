@@ -101,7 +101,6 @@ export const LocateLink = ({ uuid, isDeleted, language }: LocateLinkProps) => {
       <a
       className={styles.locate}
       href={href}
-      role="link"
       tabIndex={0}
       aria-label={t("siteHistory.locate.title")}
       aria-busy={state.status === "pending"}
