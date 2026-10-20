@@ -4,6 +4,7 @@ import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table"
 import { useEffect, useMemo, useRef, useState } from "react";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import { i18n, NAMESPACE } from "../i18n.ts";
+import { MOONSTONE_SCOPE_ATTRIBUTE } from "../moonstoneScope.ts";
 import { buildColumns, toRow } from "./columns.tsx";
 import { columnIncludes, isColumnVisible, readColumnVisibility, writeColumnVisibility } from "./columnVisibility.ts";
 import { toHistoryFilter, withColumnFilter } from "./filters.ts";
@@ -91,7 +92,11 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
   const totalItems = site?.globalHistory?.totalCount ?? previousData?.jcr?.nodeByPath?.globalHistory?.totalCount ?? 0;
   const entries = site?.globalHistory?.entries;
 
-  const columns = useMemo(() => buildColumns(t), [t]);
+  const columns = useMemo(() => buildColumns(t, language), [t, language]);
+  const choosableColumns = useMemo(
+    () => columns.map(({ key, label, menuLabel }) => ({ key, label: menuLabel ?? label })),
+    [columns],
+  );
   const visibleColumns = useMemo(
     () => columns.filter(column => isColumnVisible(columnVisibility, column.key)),
     [columns, columnVisibility],
@@ -181,7 +186,7 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
       header={<Header title={t("siteHistory.title", { siteName })}/>}
       >
           <HistoryFilters
-          columns={columns}
+          columns={choosableColumns}
           columnVisibility={columnVisibility}
           filters={columnFilters}
           pickedUsers={pickedUsers}
@@ -199,10 +204,19 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
   );
 };
 
-const SiteHistoryApp = ({ siteKey, language }: SiteHistoryProps) => (
-    <I18nextProvider i18n={i18n} defaultNS={NAMESPACE}>
-        <SiteHistory siteKey={siteKey} language={language}/>
-    </I18nextProvider>
-);
+const SiteHistoryApp = ({ siteKey, language }: SiteHistoryProps) => {
+  // The bundled moonstone tokens apply while this attribute is set, as vite.config.ts states.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute(MOONSTONE_SCOPE_ATTRIBUTE, "");
+    return () => root.removeAttribute(MOONSTONE_SCOPE_ATTRIBUTE);
+  }, []);
+
+  return (
+      <I18nextProvider i18n={i18n} defaultNS={NAMESPACE}>
+          <SiteHistory siteKey={siteKey} language={language}/>
+      </I18nextProvider>
+  );
+};
 
 export default SiteHistoryApp;

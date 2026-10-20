@@ -3,6 +3,8 @@
 /* eslint-disable no-var -- a global that globalThis exposes must be declared with var */
 declare var contextJsParameters: {
   uilang?: string;
+  /** The URL of the app shell, with the context path, such as /jahia. */
+  urlbase?: string;
   [key: string]: unknown;
 } | undefined;
 
@@ -13,6 +15,8 @@ declare var jahia: {
   >;
   reduxStore?: {
     getState: () => { site?: string; language?: string; [k: string]: unknown };
+    /** The store runs redux-thunk, so an action can be a function. */
+    dispatch: (action: unknown) => unknown;
   };
 } | undefined;
 

@@ -40,6 +40,7 @@ export const columnIncludes = (visibility: VisibilityState): ColumnIncludes => (
   showLanguage: isColumnVisible(visibility, "language"),
   showAction: isColumnVisible(visibility, "action"),
   showPath: isColumnVisible(visibility, "path"),
-  showUuid: isColumnVisible(visibility, "uuid"),
+  // The Locate column resolves the node of a row by its uuid.
+  showUuid: isColumnVisible(visibility, "uuid") || isColumnVisible(visibility, "locate"),
   showMessage: isColumnVisible(visibility, "message"),
 });

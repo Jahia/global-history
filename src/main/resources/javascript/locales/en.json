@@ -10,6 +10,7 @@
       "name": "Name",
       "property": "Property",
       "language": "Language",
+      "locate": "Locate",
       "path": "Path",
       "uuid": "UUID",
       "message": "Message"
@@ -60,6 +61,10 @@
       "close": "Close",
       "noMatch": "No column matches the search",
       "noneVisible": "All columns are hidden. Show a column to see the history."
+    },
+    "locate": {
+      "title": "Locate in jContent",
+      "missing": "This content no longer exists"
     }
   }
 }

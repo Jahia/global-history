@@ -54,6 +54,24 @@
   background-color: rgb(255 255 255 / 60%);
 }
 
+.locate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--moon-color-gray_dark);
+  cursor: pointer;
+}
+
+.locate:hover,
+.locate:focus-visible {
+  color: var(--moon-color-accent);
+}
+
+.locateDisabled.locateDisabled {
+  color: var(--moon-color-gray_light);
+  cursor: not-allowed;
+}
+
 .secondary {
   color: var(--moon-color-gray);
 }

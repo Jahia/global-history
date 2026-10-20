@@ -1,0 +1,1 @@
+A file for the Locate link of the Site history table.

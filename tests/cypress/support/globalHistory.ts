@@ -27,7 +27,21 @@ export const EDITOR = {username: 'gh-editor', password: 'password123'};
 // The second user with rows on gh_1, for the user filter.
 export const AUTHOR = {username: 'gh-author', password: 'password123'};
 
-export const COLUMN_LABELS = ['Date', 'User', 'Name', 'Property', 'Language', 'Action', 'Path', 'UUID', 'Message'];
+// The column menu names each column, and the header of the Locate column is empty.
+export const COLUMN_LABELS = [
+    'Date',
+    'User',
+    'Name',
+    'Property',
+    'Language',
+    'Action',
+    'Locate',
+    'Path',
+    'UUID',
+    'Message'
+];
+export const LOCATE_LABEL = 'Locate';
+export const headerTexts = (labels: string[]): string[] => labels.map(label => (label === LOCATE_LABEL ? '' : label));
 // The table hides these columns until the user shows them.
 export const HIDDEN_BY_DEFAULT = ['UUID', 'Message'];
 export const DEFAULT_COLUMN_LABELS = COLUMN_LABELS.filter(label => !HIDDEN_BY_DEFAULT.includes(label));

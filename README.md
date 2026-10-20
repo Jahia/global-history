@@ -30,7 +30,7 @@ The GraphQL field checks `viewHistoryTab` on the node it is called on. A user wi
 
 ## Columns
 
-The table has 9 columns and shows the newest row first. A page shows 100 rows, and you can choose 20 or 50 rows instead. The pager stays at the bottom of the table while you scroll the rows, and a new page opens on its first row.
+The table has 10 columns and shows the newest row first. A page shows 100 rows, and you can choose 20 or 50 rows instead. The pager stays at the bottom of the table while you scroll the rows, and a new page opens on its first row.
 
 The column button at the right end of the filter row lists the visible columns and the hidden columns, and a click on a column shows or hides it. The UUID and Message columns are hidden until you show them. The browser keeps the choice in its local storage under the key `globalHistory.columns`, so another browser shows the default columns. The page query skips the fields of a hidden column, so a hidden User, Name or Property column saves a lookup per row.
 
@@ -42,6 +42,7 @@ The column button at the right end of the filter row lists the visible columns a
 | Property | The label and the name of the property, on a property row only. |
 | Language | The language of a row on a translation node or an i18n property, in upper case, for example `EN`. Other rows show a globe icon. |
 | Action | The action as a chip, for example Created, Modified, Published or Accessed. An unknown action shows as plain text. |
+| Locate | A link that opens jContent on the node and selects it, like the Locate action of a jContent search. The header of this column is empty. The link resolves the node by its UUID when the pointer rests on it for 150 ms or when it gets the focus. A page load sends no query. A resolved link holds the jContent URL, and a middle click opens it in a new tab. A deleted node shows a disabled icon. |
 | Path | The path of the node at the time of the action. A tooltip shows a long path in full. |
 | UUID | The identifier of the node. |
 | Message | The workspaces of a publication, for example `default;;live`. |
@@ -125,6 +126,9 @@ The variables of this query list the published rows of `/sites/digitall/home` si
 - The user column holds the user name without its realm. A site user and a global user with the same user name share their rows.
 - MySQL, MariaDB and SQL Server often compare the user names without case. On these databases, `userKeys: ["jdoe"]` also selects the rows of the user `JDoe`.
 - The User filter calls `window.CE_API.openPicker`, which jContent sets and the Jahia Academy does not document. The page hides the User filter when jContent does not set this function.
+- The Locate link reads entries of the jContent registry that the Jahia Academy does not document: the `accordionItem` entries, `jcontent/utils` and the redux action `jcontentGoto`. It selects the node with the redux actions `CM_SET_PREVIEW_SELECTION` before jContent 3.7.0 and `CM_SET_SIDE_PANEL_SELECTION` from 3.7.0.
+- A new tab that the Locate link opens shows the folder or the page of the node. A jContent URL holds no selection, so the tab does not select the node.
+- The module bundles moonstone 2.21.0 with the scoped stylesheet of moonstone. The build adds the prefix `globhis` to each hashed class name, such as `globhis_moonstone-TableRow_cb6f0ca`. The rules of the bundle then match the elements of this module only. The moonstone tokens on `:root` apply while Site history is open, and the build drops any moonstone selector without a prefixed class.
 - The page of the module asks for `totalCount` and `entries` in one request. On a site with few rows, or with a filter that matches no row, this request took up to 7.3 seconds.
 
 The table gives the worst time of one GraphQL request with 2,000,000 rows on MariaDB and Jahia 8.2.4. The rows have 5 actions, 10 folders and 200 users, and the date filter covers 24 hours.

@@ -1,5 +1,6 @@
 import {
     DEFAULT_COLUMN_LABELS,
+    headerTexts,
     HIDDEN_BY_DEFAULT,
     PAGE_SIZE,
     SITE_KEY,
@@ -65,7 +66,7 @@ const toggleColumn = (label: string) => cy.contains(ITEMS, new RegExp(`^${label}
 
 const expectHeaders = (labels: string[]) =>
     cy.get(HEADERS, {timeout: LOAD_TIMEOUT}).should($cells => {
-        expect(textsOf($cells), 'column headers').to.deep.equal(labels);
+        expect(textsOf($cells), 'column headers').to.deep.equal(headerTexts(labels));
     });
 
 describe('Site history column choice', () => {
