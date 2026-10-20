@@ -10,6 +10,7 @@
       "name": "Nom",
       "property": "Propriété",
       "language": "Langue",
+      "locate": "Localiser",
       "path": "Chemin",
       "uuid": "UUID",
       "message": "Message"
@@ -60,6 +61,10 @@
       "close": "Fermer",
       "noMatch": "Aucune colonne ne correspond à la recherche",
       "noneVisible": "Toutes les colonnes sont masquées. Affichez une colonne pour voir l'historique."
+    },
+    "locate": {
+      "title": "Localiser dans jContent",
+      "missing": "Ce contenu n'existe plus"
     }
   }
 }

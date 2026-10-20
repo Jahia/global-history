@@ -2,6 +2,7 @@ import {
     ALL_COLUMNS_SHOWN,
     COLUMN_LABELS,
     COLUMNS_STORAGE_KEY,
+    headerTexts,
     PAGE_SIZE,
     PAGE_SIZE_OPTIONS,
     SITE_KEY,
@@ -61,11 +62,11 @@ describe('Site history page', () => {
         });
     });
 
-    it('shows the header, the nine columns and the first page of rows', () => {
+    it('shows the header, the ten columns and the first page of rows', () => {
         expect(total, 'page 2 needs more rows than one page').to.be.above(PAGE_SIZE);
         cy.contains(PAGE, `Site history: ${SITE_KEY}`, {timeout: LOAD_TIMEOUT}).should('be.visible');
         cy.get(`${TABLE} thead th`, {timeout: LOAD_TIMEOUT}).should($cells => {
-            expect(textsOf($cells), 'column headers').to.deep.equal(COLUMN_LABELS);
+            expect(textsOf($cells), 'column headers').to.deep.equal(headerTexts(COLUMN_LABELS));
         });
         cy.get(ROWS).should('have.length', PAGE_SIZE);
         cy.get(TOTAL_ITEMS)

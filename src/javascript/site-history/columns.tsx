@@ -14,6 +14,7 @@ import {
 import type { DataTableColumn } from "@jahia/moonstone/DataTable";
 import type { ComponentType } from "react";
 import { formatDate } from "./formatDate.ts";
+import { LocateLink } from "./LocateLink.tsx";
 import type { HistoryEntry } from "./siteHistory.gql.ts";
 import styles from "./SiteHistoryApp.module.css";
 
@@ -42,15 +43,20 @@ export type HistoryTableRow = {
   name: string;
   property: string;
   language: string;
+  locate: string;
   path: string;
   uuid: string;
   message: string;
   nodeExists: boolean;
+  isDeleted: boolean;
   systemName: string;
   propertyName: string;
 };
 
 type Translate = (key: string, options?: Record<string, unknown>) => string;
+
+/** The column menu names a column by its menuLabel, and the header shows its label. */
+export type HistoryColumn = DataTableColumn<HistoryTableRow> & { menuLabel?: string };
 
 const userDisplayName = (entry: HistoryEntry): string => {
   const { user, userKey } = entry;
@@ -69,10 +75,13 @@ export const toRow = (entry: HistoryEntry, uiLanguage: string): HistoryTableRow 
   name: entry.nodeNameDisplay || entry.nodeName || "",
   property: entry.propertyName ? entry.propertyNameDisplay || entry.propertyName : "",
   language: entry.language ?? "",
+  locate: entry.uuid ?? "",
   path: entry.path ?? "",
   uuid: entry.uuid ?? "",
   message: entry.message ?? "",
   nodeExists: entry.nodeExists === true,
+  // The page query loads nodeExists with the Name column only, so a missing value is unknown.
+  isDeleted: entry.nodeExists === false,
   systemName: entry.nodeName ?? "",
   propertyName: entry.propertyName ?? "",
 });
@@ -106,7 +115,7 @@ const withTechnicalName = (label: string, technicalName: string, isScrollable = 
     </Typography>
 );
 
-const columnDefinitions = (t: Translate): DataTableColumn<HistoryTableRow>[] => [
+const columnDefinitions = (t: Translate, language: string): HistoryColumn[] => [
   {
     key: "date",
     label: t("siteHistory.columns.date"),
@@ -153,6 +162,15 @@ const columnDefinitions = (t: Translate): DataTableColumn<HistoryTableRow>[] => 
     },
   },
   {
+    key: "locate",
+    label: "",
+    menuLabel: t("siteHistory.columns.locate"),
+    width: "48px",
+    align: "center",
+    render: ({ data }) =>
+      data.locate ? <LocateLink uuid={data.locate} isDeleted={data.isDeleted} language={language}/> : "",
+  },
+  {
     key: "path",
     label: t("siteHistory.columns.path"),
     render: ({ value }) => scrollFromEnd(value as string),
@@ -173,5 +191,5 @@ const columnDefinitions = (t: Translate): DataTableColumn<HistoryTableRow>[] => 
   },
 ];
 
-export const buildColumns = (t: Translate): DataTableColumn<HistoryTableRow>[] =>
-  columnDefinitions(t).map(column => ({ ...column, cellProps: { className: styles.denseCell } }));
+export const buildColumns = (t: Translate, language: string): HistoryColumn[] =>
+  columnDefinitions(t, language).map(column => ({ ...column, cellProps: { className: styles.denseCell } }));

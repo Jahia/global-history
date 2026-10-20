@@ -10,6 +10,7 @@
       "name": "Name",
       "property": "Eigenschaft",
       "language": "Sprache",
+      "locate": "Finden",
       "path": "Pfad",
       "uuid": "UUID",
       "message": "Nachricht"
@@ -60,6 +61,10 @@
       "close": "Schließen",
       "noMatch": "Keine Spalte entspricht der Suche",
       "noneVisible": "Alle Spalten sind ausgeblendet. Blenden Sie eine Spalte ein, um den Verlauf zu sehen."
+    },
+    "locate": {
+      "title": "In jContent finden",
+      "missing": "Dieser Inhalt existiert nicht mehr"
     }
   }
 }
