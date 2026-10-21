@@ -24,7 +24,7 @@ export default function registerGlobalHistory() {
         icon: <Clock/>,
         label: "global-history:siteHistory.nav",
         isSelectable: true,
-        requiredPermission: "viewHistoryTab",
+        requiredPermission: "viewGlobalHistory",
         render: (props: RouteProps) => {
           const siteKey = siteKeyOf(props);
           return (

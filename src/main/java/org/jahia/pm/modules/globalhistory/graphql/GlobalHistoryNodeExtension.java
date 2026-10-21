@@ -14,7 +14,7 @@ import javax.jcr.RepositoryException;
 @GraphQLTypeExtension(GqlJcrNode.class)
 public class GlobalHistoryNodeExtension {
 
-    private static final String HISTORY_PERMISSION = "viewHistoryTab";
+    private static final String HISTORY_PERMISSION = "viewGlobalHistory";
 
     private final GqlJcrNode node;
 
@@ -24,7 +24,7 @@ public class GlobalHistoryNodeExtension {
 
     @GraphQLField
     @GraphQLName("globalHistory")
-    @GraphQLDescription("Content history of this node and of every node below it. Requires the 'viewHistoryTab' permission on this node")
+    @GraphQLDescription("Content history of this node and of every node below it. Requires the 'viewGlobalHistory' permission on this node")
     public GqlGlobalHistory getGlobalHistory() {
         try {
             if (!node.getNode().hasPermission(HISTORY_PERMISSION)) {

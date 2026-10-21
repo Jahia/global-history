@@ -24,9 +24,11 @@ A user needs two permissions on the site node, `/sites/<siteKey>`:
 | Permission | What it controls |
 |---|---|
 | `additionalAccordionAccess` | jContent shows the Additional accordion. |
-| `viewHistoryTab` | jContent shows the Site history entry, and the GraphQL field returns the rows. |
+| `viewGlobalHistory` | jContent shows the Site history entry, and the GraphQL field returns the rows. |
 
-The GraphQL field checks `viewHistoryTab` on the node it is called on. A user without the permission gets an access-denied error and no rows. The jContent History tab uses the same permission.
+The GraphQL field checks `viewGlobalHistory` on the node it is called on. A user without the permission gets an access-denied error and no rows.
+
+The module adds the permission `viewGlobalHistory` under the `site-admin` permission group. The `site-administrator` role holds `site-admin`, and the module grants `viewGlobalHistory` to the `server-administrator` role. The jContent History tab of a node keeps its own permission, `viewHistoryTab`, so a user with `viewHistoryTab` alone does not see the Site history.
 
 ## Columns
 
@@ -113,7 +115,7 @@ The variables of this query list the published rows of `/sites/digitall/home` si
 ## Limits
 
 - A moved node keeps the old path on its old rows. Those rows stay listed under the old path.
-- The module filters no row by ACL. A user with `viewHistoryTab` on the site sees every row of the site, including the rows of a node that the user cannot read.
+- The module filters no row by ACL. A user with `viewGlobalHistory` on the site sees every row of the site, including the rows of a node that the user cannot read.
 - The table includes the `accessed` rows. Jahia writes one `accessed` row on each read of a file, and guest reads count too.
 - Jahia 8.2.4.0 deletes the rows that are older than 13 months. On Jahia 8.2.3, a purge in December keeps 1 year of rows.
 - Jahia does not log the actions of the user `system`. A script that runs as `system`, such as a Groovy script, leaves no row.
