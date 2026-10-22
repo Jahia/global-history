@@ -81,6 +81,13 @@ export type HistoryFilter = {
     path?: string;
 };
 
+export type HistorySortField = 'DATE' | 'USER' | 'ACTION' | 'PATH' | 'PROPERTY' | 'UUID' | 'MESSAGE';
+
+export type HistorySort = {
+    field: HistorySortField;
+    direction: 'ASC' | 'DESC';
+};
+
 type GraphqlResult = ApolloQueryResult<unknown> | FetchResult;
 
 type HistoryData = {
@@ -112,12 +119,12 @@ export const historyPage = (
     path: string,
     offset: number,
     limit: number | null,
-    filter?: HistoryFilter
+    {filter, sort}: {filter?: HistoryFilter; sort?: HistorySort} = {}
 ): Cypress.Chainable<GlobalHistory> =>
     cy
         .apollo({
             queryFile: 'graphql/globalHistory/historyPage.graphql',
-            variables: {path, offset, limit, filter},
+            variables: {path, offset, limit, filter, sort},
             errorPolicy: 'all'
         })
         .then(result => historyOf(result, path));
@@ -143,7 +150,7 @@ export const collectEntries = (
     filter?: HistoryFilter,
     collected: HistoryEntry[] = []
 ): Cypress.Chainable<HistoryEntry[]> =>
-    historyPage(path, collected.length, MAX_LIMIT, filter).then(page => {
+    historyPage(path, collected.length, MAX_LIMIT, {filter}).then(page => {
         const entries = collected.concat(page.entries);
         const isLastPage = page.entries.length === 0 || entries.length >= page.totalCount;
         if (isDone(entries) || isLastPage || entries.length >= MAX_PAGES * MAX_LIMIT) {
@@ -151,6 +158,21 @@ export const collectEntries = (
         }
 
         return collectEntries(path, isDone, filter, entries);
+    });
+
+// Reads every row of a path in the order of the sort, 100 rows at a time.
+export const sortedEntries = (
+    path: string,
+    sort: HistorySort,
+    collected: HistoryEntry[] = []
+): Cypress.Chainable<HistoryEntry[]> =>
+    historyPage(path, collected.length, MAX_LIMIT, {sort}).then(page => {
+        const entries = collected.concat(page.entries);
+        if (page.entries.length === 0 || entries.length >= page.totalCount) {
+            return cy.wrap(entries, {log: false});
+        }
+
+        return sortedEntries(path, sort, entries);
     });
 
 export const hasActionForEach = (entries: HistoryEntry[], uuids: string[], action: string): boolean =>

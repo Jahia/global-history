@@ -45,10 +45,10 @@ public class HistoryRepository {
     }
 
     /**
-     * @return the rows of the page, newest first
+     * @return the rows of the page, in the order of the sort
      */
-    public List<HistoryRow> page(HistoryFilter filter, HistoryPage page) throws SQLException {
-        HistorySql sql = dialect.pageSql(filter, page);
+    public List<HistoryRow> page(HistoryFilter filter, HistorySort sort, HistoryPage page) throws SQLException {
+        HistorySql sql = dialect.pageSql(filter, sort, page);
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql.getText())) {
             statement.setQueryTimeout(QUERY_TIMEOUT_SECONDS);

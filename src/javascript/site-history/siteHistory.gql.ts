@@ -47,6 +47,13 @@ export type HistoryFilterInput = {
   path?: string;
 };
 
+export type HistorySortField = "DATE" | "USER" | "ACTION" | "PATH" | "PROPERTY" | "UUID" | "MESSAGE";
+
+export type HistorySortInput = {
+  field: HistorySortField;
+  direction: "ASC" | "DESC";
+};
+
 export type ColumnIncludes = {
   showDate: boolean;
   showUser: boolean;
@@ -65,6 +72,7 @@ export type SiteHistoryVariables = ColumnIncludes & {
   offset: number;
   limit: number;
   filter: HistoryFilterInput;
+  sort: HistorySortInput;
 };
 
 export const SITE_HISTORY_QUERY = gql`
@@ -74,6 +82,7 @@ export const SITE_HISTORY_QUERY = gql`
     $offset: Int!
     $limit: Int!
     $filter: InputGlobalHistoryFilter
+    $sort: InputGlobalHistorySort
     $showDate: Boolean!
     $showUser: Boolean!
     $showName: Boolean!
@@ -91,7 +100,7 @@ export const SITE_HISTORY_QUERY = gql`
         displayName(language: $uiLanguage)
         globalHistory {
           totalCount(filter: $filter)
-          entries(offset: $offset, limit: $limit, filter: $filter) {
+          entries(offset: $offset, limit: $limit, filter: $filter, sort: $sort) {
             id
             date @include(if: $showDate)
             uuid @include(if: $showUuid)

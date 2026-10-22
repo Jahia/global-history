@@ -32,7 +32,9 @@ The module adds the permission `viewGlobalHistory` under the `site-admin` permis
 
 ## Columns
 
-The table has 10 columns and shows the newest row first. A page shows 100 rows, and you can choose 20 or 50 rows instead. The pager stays at the bottom of the table while you scroll the rows, and a new page opens on its first row.
+The table has 10 columns and shows the newest row first. A page shows 100 rows, and you can choose 20 or 50 rows instead.
+
+You can sort the table by the Date, User, Property, Action, Path, UUID or Message column. A click on the title of the column sorts the rows, and a second click reverses the order. The table returns to page 1 when the sort changes, and rows with an equal value show the newest row first. The User column sorts by user name, and the Property column sorts by property name. These names can differ from the text in the cell. The table returns to the newest row first after a reload, and when you hide the sorted column. The pager stays at the bottom of the table while you scroll the rows, and a new page opens on its first row.
 
 The column button at the right end of the filter row lists the visible columns and the hidden columns, and a click on a column shows or hides it. The UUID and Message columns are hidden until you show them. The browser keeps the choice in its local storage under the key `globalHistory.columns`, so another browser shows the default columns. The page query skips the fields of a hidden column, so a hidden User, Name or Property column saves a lookup per row.
 
@@ -112,6 +114,19 @@ The variables of this query list the published rows of `/sites/digitall/home` si
 {"filter": {"actions": ["published"], "fromTimestamp": 1790805600000, "path": "/sites/digitall/home"}}
 ```
 
+`entries` takes an optional `sort` argument of type `InputGlobalHistorySort`. A null `sort` lists the newest rows first, and rows with an equal value come newest first in every sort.
+
+| Field | Values |
+|---|---|
+| `field` | `DATE`, `USER`, `ACTION`, `PATH`, `PROPERTY`, `UUID` or `MESSAGE`. `USER` sorts by user name, and `PROPERTY` sorts by property name. |
+| `direction` | `ASC` or `DESC`. |
+
+These variables list the rows of the user names in alphabetical order:
+
+```json
+{"sort": {"field": "USER", "direction": "ASC"}}
+```
+
 ## Limits
 
 - A moved node keeps the old path on its old rows. Those rows stay listed under the old path.
@@ -123,6 +138,8 @@ The variables of this query list the published rows of `/sites/digitall/home` si
 - A site that is deleted and created again with the same key shows the rows of the old site until the purge deletes them.
 - When a whole site is published for the first time, Jahia writes a `published` row for the site node only. A node that changes later gets its own `published` row when it is published again.
 - No database index covers the path column, the action column or the user column, so a count reads the whole history table. On Jahia 8.2.4 and newer, a count with a date filter reads only the rows of its date range, through the date index.
+- A sort on any column except Date reads every row that matches the filters for each page, because no database index covers the other columns. On PostgreSQL, a sort by path also reads the large object of the path of each of these rows.
+- Each database sorts text with its own collation. MariaDB, MySQL and SQL Server put empty values first in ascending order, and PostgreSQL, Oracle and Derby put them last. On Oracle, a sort by path compares the first 1,000 characters of each path.
 - The first page of a site with few rows reads most of the date index. A filter that matches few rows has the same cost on any site. Jahia 8.2.3 and older have no date index.
 - The User filter opens the user picker of jContent, and the picker lists the existing users only. The rows of a deleted user stay in the table, but the User filter cannot select that user.
 - The user column holds the user name without its realm. A site user and a global user with the same user name share their rows.

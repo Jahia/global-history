@@ -118,12 +118,14 @@ const withTechnicalName = (label: string, technicalName: string, isScrollable = 
 const columnDefinitions = (t: Translate, language: string): HistoryColumn[] => [
   {
     key: "date",
+    isSortable: true,
     label: t("siteHistory.columns.date"),
     width: "190px",
     render: ({ value }) => caption(value as string),
   },
   {
     key: "user",
+    isSortable: true,
     label: t("siteHistory.columns.user"),
     width: "130px",
     render: ({ value }) => ellipsis(value as string),
@@ -136,6 +138,7 @@ const columnDefinitions = (t: Translate, language: string): HistoryColumn[] => [
   },
   {
     key: "property",
+    isSortable: true,
     label: t("siteHistory.columns.property"),
     width: "200px",
     render: ({ data }) => (data.propertyName ? withTechnicalName(data.property, data.propertyName) : ""),
@@ -149,6 +152,7 @@ const columnDefinitions = (t: Translate, language: string): HistoryColumn[] => [
   },
   {
     key: "action",
+    isSortable: true,
     label: t("siteHistory.columns.action"),
     width: "130px",
     render: ({ value }) => {
@@ -172,11 +176,13 @@ const columnDefinitions = (t: Translate, language: string): HistoryColumn[] => [
   },
   {
     key: "path",
+    isSortable: true,
     label: t("siteHistory.columns.path"),
     render: ({ value }) => scrollFromEnd(value as string),
   },
   {
     key: "uuid",
+    isSortable: true,
     label: t("siteHistory.columns.uuid"),
     width: "290px",
     render: ({ value }) => (
@@ -185,6 +191,7 @@ const columnDefinitions = (t: Translate, language: string): HistoryColumn[] => [
   },
   {
     key: "message",
+    isSortable: true,
     label: t("siteHistory.columns.message"),
     width: "160px",
     render: ({ value }) => ellipsis(value as string),

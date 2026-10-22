@@ -1,16 +1,18 @@
 import { useQuery, type ApolloError } from "@apollo/client";
 import { Banner, DataTable, EmptyData, Header, LayoutContent, Loader, Paper } from "@jahia/moonstone";
-import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table";
+import type { SortDirection } from "@jahia/moonstone/DataTable";
+import type { ColumnFiltersState, SortingState, VisibilityState } from "@tanstack/react-table";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import { i18n, NAMESPACE } from "../i18n.ts";
 import { MOONSTONE_SCOPE_ATTRIBUTE } from "../moonstoneScope.ts";
-import { buildColumns, toRow } from "./columns.tsx";
+import { buildColumns, toRow, type HistoryTableRow } from "./columns.tsx";
 import { columnIncludes, isColumnVisible, readColumnVisibility, writeColumnVisibility } from "./columnVisibility.ts";
 import { toHistoryFilter, withColumnFilter } from "./filters.ts";
 import { HistoryFilters, type PickedUser } from "./HistoryFilters.tsx";
 import { SITE_HISTORY_QUERY, type HistoryEntry, type SiteHistoryData, type SiteHistoryVariables } from "./siteHistory.gql.ts";
 import styles from "./SiteHistoryApp.module.css";
+import { DEFAULT_SORTING, toHistorySort } from "./sorting.ts";
 
 const ITEMS_PER_PAGE_OPTIONS = [20, 50, 100];
 const DEFAULT_ITEMS_PER_PAGE = 100;
@@ -50,13 +52,15 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
   // LayoutContent unmounts the filters while a page loads with no previous rows, so the picked users live here.
   const [pickedUsers, setPickedUsers] = useState<PickedUser[]>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(readColumnVisibility);
+  const [sorting, setSorting] = useState<SortingState>(DEFAULT_SORTING);
   const filter = useMemo(() => toHistoryFilter(columnFilters), [columnFilters]);
+  const sort = useMemo(() => toHistorySort(sorting), [sorting]);
   const paperRef = useRef<HTMLElement>(null);
 
   // The Paper stays mounted on a new page, so without this reset the page opens at the scroll offset of the old one.
   useEffect(() => {
     paperRef.current?.scrollTo({ top: 0 });
-  }, [currentPage, itemsPerPage, filter]);
+  }, [currentPage, itemsPerPage, filter, sort]);
 
   const setFilter = (id: string, value: unknown) => {
     setColumnFilters(old => withColumnFilter(old, id, value));
@@ -68,9 +72,19 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
     setCurrentPage(1);
   };
 
+  const changeSort = (id: string, direction: SortDirection) => {
+    setSorting([{ id, desc: direction === "descending" }]);
+    setCurrentPage(1);
+  };
+
   const changeColumnVisibility = (visibility: VisibilityState) => {
     setColumnVisibility(visibility);
     writeColumnVisibility(visibility);
+    // A hidden column shows no sort arrow, so the table returns to the default order.
+    if (!isColumnVisible(visibility, sorting[0].id)) {
+      setSorting(DEFAULT_SORTING);
+      setCurrentPage(1);
+    }
   };
 
   const { data, previousData, loading, error } = useQuery<SiteHistoryData, SiteHistoryVariables>(SITE_HISTORY_QUERY, {
@@ -80,6 +94,7 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
       offset: (currentPage - 1) * itemsPerPage,
       limit: itemsPerPage,
       filter,
+      sort,
       ...columnIncludes(columnVisibility),
     },
     fetchPolicy: "network-only",
@@ -147,10 +162,12 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
             <Paper ref={paperRef} hasPadding={false} className={styles.tableWrapper} aria-busy={loading} data-sel-role="site-history-table">
                 <DataTable
           enablePagination
+          enableSorting
           primaryKey="id"
           data={rows}
           columns={visibleColumns}
-          enableSorting={false}
+          sortBy={sorting[0].id as keyof HistoryTableRow}
+          sortDirection={sorting[0].desc ? "descending" : "ascending"}
           currentPage={currentPage}
           itemsPerPage={itemsPerPage}
           itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
@@ -161,6 +178,7 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
             itemsPerPage: t("siteHistory.pagination.itemsPerPage"),
             of: t("siteHistory.pagination.of"),
           }}
+          onSortChange={changeSort}
           onPageChange={setCurrentPage}
           onItemsPerPageChange={value => {
             setItemsPerPage(value);

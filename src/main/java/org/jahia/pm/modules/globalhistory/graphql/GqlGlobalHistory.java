@@ -11,6 +11,7 @@ import org.jahia.pm.modules.globalhistory.history.HistoryFilter;
 import org.jahia.pm.modules.globalhistory.history.HistoryPage;
 import org.jahia.pm.modules.globalhistory.history.HistoryRepository;
 import org.jahia.pm.modules.globalhistory.history.HistoryRow;
+import org.jahia.pm.modules.globalhistory.history.HistorySort;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.JCRSessionWrapper;
@@ -54,16 +55,17 @@ public class GqlGlobalHistory {
 
     @GraphQLField
     @GraphQLName("entries")
-    @GraphQLDescription("One page of the history rows that match the filter, newest first")
+    @GraphQLDescription("One page of the history rows that match the filter, in the order of the sort")
     public List<GqlGlobalHistoryEntry> getEntries(
             @GraphQLName("offset") @GraphQLDescription("Number of rows to skip, 0 or more (default: 0)") Integer offset,
             @GraphQLName("limit") @GraphQLDescription("Number of rows to return, clamped to 1..100 (default: 20)") Integer limit,
-            @GraphQLName("filter") @GraphQLDescription(FILTER_DESCRIPTION) GqlGlobalHistoryFilter filter) {
+            @GraphQLName("filter") @GraphQLDescription(FILTER_DESCRIPTION) GqlGlobalHistoryFilter filter,
+            @GraphQLName("sort") @GraphQLDescription("Order of the rows, null for the newest rows first") GqlGlobalHistorySort sort) {
         HistoryPage page = validInput(() -> HistoryPage.of(offset, limit));
         HistoryFilter historyFilter = validInput(() -> historyFilter(filter));
         List<HistoryRow> rows;
         try {
-            rows = repository.page(historyFilter, page);
+            rows = repository.page(historyFilter, historySort(sort), page);
         } catch (SQLException e) {
             throw readFailure(e);
         }
@@ -77,6 +79,14 @@ public class GqlGlobalHistory {
         }
         return HistoryFilter.of(node.getPath(), filter.getPath(), filter.getActions(), filter.getUserKeys(),
                 filter.getFromTimestamp(), filter.getBeforeTimestamp());
+    }
+
+    private static HistorySort historySort(GqlGlobalHistorySort sort) {
+        if (sort == null) {
+            return HistorySort.NEWEST_FIRST;
+        }
+        return new HistorySort(HistorySort.Field.valueOf(sort.getField().name()),
+                sort.getDirection() == GqlGlobalHistorySort.Direction.DESC);
     }
 
     private static <T> T validInput(Supplier<T> input) {

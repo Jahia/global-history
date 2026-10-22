@@ -28,6 +28,8 @@ export default defineConfig({
             'cypress/e2e/globalHistoryPage.cy.ts',
             'cypress/e2e/globalHistoryFilters.cy.ts',
             'cypress/e2e/globalHistoryFiltersPage.cy.ts',
+            'cypress/e2e/globalHistorySort.cy.ts',
+            'cypress/e2e/globalHistorySortPage.cy.ts',
             'cypress/e2e/globalHistoryColumns.cy.ts',
             'cypress/e2e/globalHistoryLocate.cy.ts',
             'cypress/e2e/globalHistoryZTeardown.cy.ts'
