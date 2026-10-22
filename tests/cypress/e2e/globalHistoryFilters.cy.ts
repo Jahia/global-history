@@ -105,7 +105,7 @@ describe('globalHistory filters', () => {
                 expect(timestampsOtherThan(entries, timestamp), 'timestamps of the other rows').to.deep.equal([]);
             });
 
-            historyPage(SITE_PATH, 0, MAX_LIMIT, {beforeTimestamp: timestamp}).then(page => {
+            historyPage(SITE_PATH, 0, MAX_LIMIT, {filter: {beforeTimestamp: timestamp}}).then(page => {
                 expect(page.entries, 'rows before the created row').not.to.be.empty;
                 expect(timestampsFrom(page.entries, timestamp), 'timestamps at or after the end').to.deep.equal([]);
                 expect(idsOf(page.entries), 'rows before the created row').not.to.include(created.id);
@@ -215,7 +215,7 @@ describe('globalHistory filters', () => {
             [0, 5],
             [5, 5]
         ].forEach(([offset, limit]) =>
-            historyPage(SITE_PATH, offset, limit, {actions}).then(page => {
+            historyPage(SITE_PATH, offset, limit, {filter: {actions}}).then(page => {
                 pages.push(page);
             })
         );
@@ -231,7 +231,7 @@ describe('globalHistory filters', () => {
 
             const totals = pages.map(page => page.totalCount);
 
-            historyPage(SITE_PATH, count - 3, 10, {actions}).then(last => {
+            historyPage(SITE_PATH, count - 3, 10, {filter: {actions}}).then(last => {
                 expect(last.entries, 'rows of the last page').to.have.length(3);
                 expect([...totals, last.totalCount], 'totalCount').to.deep.equal([count, count, count, count]);
             });

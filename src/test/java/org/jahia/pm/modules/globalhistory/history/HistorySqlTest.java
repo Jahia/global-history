@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class HistorySqlTest {
@@ -43,7 +44,7 @@ class HistorySqlTest {
         assertEquals("SELECT COUNT(*) FROM jahia_contenthistory" + where, count.getText());
         assertEquals(SCOPE_PATTERNS, count.getParameters());
 
-        HistorySql page = dialect.pageSql(noFilter, HistoryPage.of(40, 20));
+        HistorySql page = dialect.pageSql(noFilter, HistorySort.NEWEST_FIRST, HistoryPage.of(40, 20));
         assertEquals("SELECT id, entry_date, uuid, property_name, " + path + " AS entry_path, entry_action, user_key, message"
                 + " FROM jahia_contenthistory" + where + " ORDER BY entry_date DESC, id DESC " + pagination, page.getText());
         List<Object> parameters = new ArrayList<>(SCOPE_PATTERNS);
@@ -58,6 +59,42 @@ class HistorySqlTest {
                 filteredCount.getText());
         assertEquals(asList("/sites/gh!_1/contents", "/sites/gh!_1/contents/%", "created", "published", "root", "gh-author",
                 1790805600000L, 1792101600000L), filteredCount.getParameters());
+    }
+
+    static Stream<Arguments> sorts() {
+        return Stream.of(
+                arguments(HistorySort.Field.DATE, false, "entry_date ASC, id ASC"),
+                arguments(HistorySort.Field.DATE, true, "entry_date DESC, id DESC"),
+                arguments(HistorySort.Field.USER, false, "user_key ASC, entry_date DESC, id DESC"),
+                arguments(HistorySort.Field.ACTION, true, "entry_action DESC, entry_date DESC, id DESC"),
+                arguments(HistorySort.Field.PROPERTY, false, "property_name ASC, entry_date DESC, id DESC"),
+                arguments(HistorySort.Field.UUID, true, "uuid DESC, entry_date DESC, id DESC"),
+                arguments(HistorySort.Field.MESSAGE, false, "message ASC, entry_date DESC, id DESC"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("sorts")
+    void sortOrdersByItsColumnThenNewestFirst(HistorySort.Field field, boolean descending, String orderBy) {
+        HistorySql page = HistoryDialect.MYSQL.pageSql(HistoryFilter.of(SCOPE, null, null, null, null, null),
+                new HistorySort(field, descending), HistoryPage.of(0, 20));
+        assertTrue(page.getText().endsWith(" ORDER BY " + orderBy + " " + LIMIT_OFFSET), page.getText());
+    }
+
+    static Stream<Arguments> pathSorts() {
+        return Stream.of(
+                arguments(HistoryDialect.MYSQL, "entry_path"),
+                arguments(HistoryDialect.DERBY, "CAST(entry_path AS VARCHAR(32672))"),
+                arguments(HistoryDialect.POSTGRESQL, "convert_from(lo_get(entry_path), 'UTF8')"),
+                arguments(HistoryDialect.ORACLE, "DBMS_LOB.SUBSTR(entry_path, 1000, 1)"),
+                arguments(HistoryDialect.MSSQL, "entry_path"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("pathSorts")
+    void pathSortUsesAnExpressionThatTheDatabaseCanSort(HistoryDialect dialect, String pathSort) {
+        HistorySql page = dialect.pageSql(HistoryFilter.of(SCOPE, null, null, null, null, null),
+                new HistorySort(HistorySort.Field.PATH, false), HistoryPage.of(0, 20));
+        assertTrue(page.getText().contains(" ORDER BY " + pathSort + " ASC, entry_date DESC, id DESC "), page.getText());
     }
 
     @Test

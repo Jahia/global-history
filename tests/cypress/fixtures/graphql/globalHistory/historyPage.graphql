@@ -1,10 +1,10 @@
-query globalHistoryPage($path: String!, $offset: Int, $limit: Int, $filter: InputGlobalHistoryFilter) {
+query globalHistoryPage($path: String!, $offset: Int, $limit: Int, $filter: InputGlobalHistoryFilter, $sort: InputGlobalHistorySort) {
     jcr {
         nodeByPath(path: $path) {
             uuid
             globalHistory {
                 totalCount(filter: $filter)
-                entries(offset: $offset, limit: $limit, filter: $filter) {
+                entries(offset: $offset, limit: $limit, filter: $filter, sort: $sort) {
                     id
                     timestamp
                     uuid

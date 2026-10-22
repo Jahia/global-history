@@ -11,14 +11,16 @@ import java.util.List;
  */
 public enum HistoryDialect {
 
-    MYSQL(Sql.PATH, Sql.LIKE + " BINARY", Pagination.LIMIT_OFFSET),
-    DERBY(Sql.PATH, Sql.LIKE, Pagination.OFFSET_FETCH),
-    POSTGRESQL("convert_from(lo_get(" + Sql.PATH + "), 'UTF8')", Sql.LIKE, Pagination.LIMIT_OFFSET),
-    ORACLE(Sql.PATH, Sql.LIKE, Pagination.OFFSET_FETCH),
-    MSSQL(Sql.PATH + " COLLATE Latin1_General_BIN", Sql.LIKE, Pagination.OFFSET_FETCH);
+    MYSQL(Sql.PATH, Sql.PATH, Sql.LIKE + " BINARY", Pagination.LIMIT_OFFSET),
+    // Derby and Oracle store the path as a CLOB, and neither database sorts a CLOB.
+    DERBY(Sql.PATH, "CAST(" + Sql.PATH + " AS VARCHAR(32672))", Sql.LIKE, Pagination.OFFSET_FETCH),
+    POSTGRESQL(Sql.POSTGRESQL_PATH, Sql.POSTGRESQL_PATH, Sql.LIKE, Pagination.LIMIT_OFFSET),
+    ORACLE(Sql.PATH, "DBMS_LOB.SUBSTR(" + Sql.PATH + ", 1000, 1)", Sql.LIKE, Pagination.OFFSET_FETCH),
+    MSSQL(Sql.PATH + " COLLATE Latin1_General_BIN", Sql.PATH, Sql.LIKE, Pagination.OFFSET_FETCH);
 
     private static final class Sql {
         static final String PATH = "entry_path";
+        static final String POSTGRESQL_PATH = "convert_from(lo_get(" + PATH + "), 'UTF8')";
         static final String LIKE = "LIKE";
 
         private Sql() {
@@ -39,11 +41,13 @@ public enum HistoryDialect {
     private static final String TABLE = "jahia_contenthistory";
 
     private final String pathExpression;
+    private final String pathSortExpression;
     private final String likeOperator;
     private final Pagination pagination;
 
-    HistoryDialect(String pathExpression, String likeOperator, Pagination pagination) {
+    HistoryDialect(String pathExpression, String pathSortExpression, String likeOperator, Pagination pagination) {
         this.pathExpression = pathExpression;
+        this.pathSortExpression = pathSortExpression;
         this.likeOperator = likeOperator;
         this.pagination = pagination;
     }
@@ -75,9 +79,10 @@ public enum HistoryDialect {
     }
 
     /**
-     * @return the page query of the rows that match the filter, newest first
+     * @return the page query of the rows that match the filter, in the order of the sort; rows with an equal value
+     * come newest first
      */
-    public HistorySql pageSql(HistoryFilter filter, HistoryPage page) {
+    public HistorySql pageSql(HistoryFilter filter, HistorySort sort, HistoryPage page) {
         HistorySql where = where(filter);
         List<Object> parameters = new ArrayList<>(where.getParameters());
         if (pagination == Pagination.LIMIT_OFFSET) {
@@ -90,9 +95,19 @@ public enum HistoryDialect {
         String text = "SELECT id, entry_date, uuid, property_name, " + pathExpression + " AS entry_path, entry_action, user_key, message"
                 + " FROM " + TABLE
                 + " WHERE " + where.getText()
-                + " ORDER BY entry_date DESC, id DESC "
+                + " ORDER BY " + orderBy(sort) + " "
                 + pagination.clause;
         return new HistorySql(text, parameters);
+    }
+
+    private String orderBy(HistorySort sort) {
+        String direction = sort.isDescending() ? " DESC" : " ASC";
+        HistorySort.Field field = sort.getField();
+        if (field == HistorySort.Field.DATE) {
+            return "entry_date" + direction + ", id" + direction;
+        }
+        String column = field == HistorySort.Field.PATH ? pathSortExpression : field.getColumn();
+        return column + direction + ", entry_date DESC, id DESC";
     }
 
     /**
