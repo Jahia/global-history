@@ -1,0 +1,10 @@
+query siteHistoryTotalCount($path: String!, $filter: InputSiteHistoryFilter) {
+    jcr {
+        nodeByPath(path: $path) {
+            uuid
+            siteHistory {
+                totalCount(filter: $filter)
+            }
+        }
+    }
+}

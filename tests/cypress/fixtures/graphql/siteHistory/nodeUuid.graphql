@@ -1,0 +1,7 @@
+query siteHistoryNodeUuid($path: String!) {
+    jcr {
+        nodeByPath(path: $path) {
+            uuid
+        }
+    }
+}

@@ -112,7 +112,7 @@ const UserFilter = ({ filters, pickedUsers, siteKey, language, onChange, onPick 
   if (users.length === 0) {
     return (
         <EmptyCardSelector
-        id="global-history-filter-user"
+        id="site-history-filter-user"
         className={styles.userFilter}
         iconStart={<Person/>}
         label={t("siteHistory.filters.user")}
@@ -124,7 +124,7 @@ const UserFilter = ({ filters, pickedUsers, siteKey, language, onChange, onPick 
 
   return (
       <CardSelector
-      id="global-history-filter-user"
+      id="site-history-filter-user"
       className={styles.userFilter}
       thumbnail={<Person/>}
       thumbnailType="icon"

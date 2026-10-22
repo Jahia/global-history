@@ -1,6 +1,6 @@
 {
-  "name": "globalhistory",
-  "comment-for-name": "do not use global-history for package name otherwise it blocks the rendering of the ui",
+  "name": "sitehistory",
+  "comment-for-name": "do not use site-history for package name otherwise it blocks the rendering of the ui",
   "private": true,
   "license": "MIT",
   "type": "module",

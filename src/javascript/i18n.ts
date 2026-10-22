@@ -1,6 +1,6 @@
 import i18nModule from "i18next";
 
-export const NAMESPACE = "global-history";
+export const NAMESPACE = "site-history";
 
 // The shared i18next has no __esModule marker, so the default import can be the module namespace.
 export const i18n =

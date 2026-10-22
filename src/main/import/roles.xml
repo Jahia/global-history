@@ -3,6 +3,6 @@
        xmlns:jcr="http://www.jcp.org/jcr/1.0"
        xmlns:j="http://www.jahia.org/jahia/1.0"
        xmlns:jnt="http://www.jahia.org/jahia/nt/1.0">
-    <server-administrator j:permissionNames="viewGlobalHistory"
+    <server-administrator j:permissionNames="viewSiteHistory"
                           jcr:primaryType="jnt:role"/>
 </roles>

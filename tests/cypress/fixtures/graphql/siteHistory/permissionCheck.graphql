@@ -1,0 +1,11 @@
+query siteHistoryPermissionCheck($path: String!, $permission: String!) {
+    jcr {
+        nodeByPath(path: $path) {
+            uuid
+            hasPermission(permissionName: $permission)
+            siteHistory {
+                totalCount
+            }
+        }
+    }
+}

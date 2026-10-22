@@ -15,7 +15,7 @@ jobs:
       matrix:
         git_branch: ["${{ github.event.repository.default_branch }}"]
     with:
-      module_id: global-history
+      module_id: site-history
       git_branch: ${{ matrix.git_branch }}
-      incident_service: global-history-sonar
-      github_slug: Jahia/global-history
+      incident_service: site-history-sonar
+      github_slug: Jahia/site-history

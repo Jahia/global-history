@@ -2,6 +2,6 @@
   username: 'NEXUS_USERNAME'
   password: 'NEXUS_PASSWORD'
 - installBundle:
-      - 'mvn:org.jahia.pm.modules/global-history'
+      - 'mvn:org.jahia.pm.modules/site-history'
   autoStart: true
   uninstallPreviousVersion: true

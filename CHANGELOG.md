@@ -1,4 +1,4 @@
-# global-history Changelog
+# site-history Changelog
 
 ## 0.1.0
 

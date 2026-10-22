@@ -1,7 +1,0 @@
-query globalHistoryNodeUuid($path: String!) {
-    jcr {
-        nodeByPath(path: $path) {
-            uuid
-        }
-    }
-}

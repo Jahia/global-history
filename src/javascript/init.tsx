@@ -13,8 +13,8 @@ const siteKeyOf = (props: RouteProps): string =>
 const languageOf = (props: RouteProps): string =>
   props?.match?.params?.lang ?? globalThis.jahia?.reduxStore?.getState().language ?? "";
 
-export default function registerGlobalHistory() {
-  registry.add("callback", "global-history", {
+export default function registerSiteHistory() {
+  registry.add("callback", "site-history", {
     targets: ["jahiaApp-init:50"],
     callback: () => {
       i18n.loadNamespaces(NAMESPACE);
@@ -22,9 +22,9 @@ export default function registerGlobalHistory() {
       registry.add("adminRoute", "siteHistory", {
         targets: ["jcontent:60"],
         icon: <Clock/>,
-        label: "global-history:siteHistory.nav",
+        label: "site-history:siteHistory.nav",
         isSelectable: true,
-        requiredPermission: "viewGlobalHistory",
+        requiredPermission: "viewSiteHistory",
         render: (props: RouteProps) => {
           const siteKey = siteKeyOf(props);
           return (

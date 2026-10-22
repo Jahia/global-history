@@ -11,9 +11,9 @@
         <version>8.2.2.0</version>
     </parent>
     <groupId>org.jahia.pm.modules</groupId>
-    <artifactId>global-history</artifactId>
+    <artifactId>site-history</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <name>Global History</name>
+    <name>Site History</name>
     <description>Lists the content history of a whole site in jContent.</description>
     <packaging>bundle</packaging>
 
@@ -26,9 +26,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:Jahia/global-history.git</connection>
-        <developerConnection>scm:git:git@github.com:Jahia/global-history.git</developerConnection>
-        <url>https://github.com/Jahia/global-history</url>
+        <connection>scm:git:git@github.com:Jahia/site-history.git</connection>
+        <developerConnection>scm:git:git@github.com:Jahia/site-history.git</developerConnection>
+        <url>https://github.com/Jahia/site-history</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -71,7 +71,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>global-history</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>site-history</Bundle-SymbolicName>
                         <_dsannotations>*</_dsannotations>
                         <Import-Package>
                             org.jahia.modules.graphql.provider.dxm,

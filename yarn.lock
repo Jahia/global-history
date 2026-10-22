@@ -4202,34 +4202,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globalhistory@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "globalhistory@workspace:."
-  dependencies:
-    "@apollo/client": "npm:^3.11.0"
-    "@jahia/eslint-config": "npm:^2.2.0"
-    "@jahia/moonstone": "npm:2.21.0"
-    "@jahia/ui-extender": "npm:^1.2.0"
-    "@jahia/vite-federation-plugin": "npm:0.1.1"
-    "@tanstack/react-table": "npm:8.21.3"
-    "@types/react": "npm:^18.3.28"
-    "@types/react-dom": "npm:^18"
-    "@typescript-eslint/eslint-plugin": "npm:^8.51.0"
-    "@typescript-eslint/parser": "npm:^8.51.0"
-    dayjs: "npm:1.11.21"
-    eslint: "npm:^8.57.1"
-    eslint-plugin-json: "npm:^4.0.1"
-    graphql: "npm:^16.13.1"
-    i18next: "npm:^20.6.1"
-    postcss: "npm:8.5.8"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    react-i18next: "npm:^11.18.6"
-    typescript: "npm:^5.9.3"
-    vite: "npm:7.3.5"
-  languageName: unknown
-  linkType: soft
-
 "globals@npm:^13.19.0, globals@npm:^13.24.0":
   version: 13.24.0
   resolution: "globals@npm:13.24.0"
@@ -6316,6 +6288,34 @@ __metadata:
   checksum: 10c0/cb20dad41eb032e6c24c0982e1e5a24963a28aa6122b4f05b3f3d6bf8ae7fd5474ef382c8f54a6a3ab86e0cac4d41a23bd64ede3970e5bfb50326ba02a7996e6
   languageName: node
   linkType: hard
+
+"sitehistory@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "sitehistory@workspace:."
+  dependencies:
+    "@apollo/client": "npm:^3.11.0"
+    "@jahia/eslint-config": "npm:^2.2.0"
+    "@jahia/moonstone": "npm:2.21.0"
+    "@jahia/ui-extender": "npm:^1.2.0"
+    "@jahia/vite-federation-plugin": "npm:0.1.1"
+    "@tanstack/react-table": "npm:8.21.3"
+    "@types/react": "npm:^18.3.28"
+    "@types/react-dom": "npm:^18"
+    "@typescript-eslint/eslint-plugin": "npm:^8.51.0"
+    "@typescript-eslint/parser": "npm:^8.51.0"
+    dayjs: "npm:1.11.21"
+    eslint: "npm:^8.57.1"
+    eslint-plugin-json: "npm:^4.0.1"
+    graphql: "npm:^16.13.1"
+    i18next: "npm:^20.6.1"
+    postcss: "npm:8.5.8"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    react-i18next: "npm:^11.18.6"
+    typescript: "npm:^5.9.3"
+    vite: "npm:7.3.5"
+  languageName: unknown
+  linkType: soft
 
 "slash@npm:^3.0.0":
   version: 3.0.0

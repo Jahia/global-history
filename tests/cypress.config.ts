@@ -21,18 +21,18 @@ export default defineConfig({
             return require('./cypress/plugins/index.js')(on, config);
         },
         specPattern: [
-            'cypress/e2e/globalHistory0Setup.cy.ts',
-            'cypress/e2e/globalHistoryScope.cy.ts',
-            'cypress/e2e/globalHistoryPagination.cy.ts',
-            'cypress/e2e/globalHistoryPermission.cy.ts',
-            'cypress/e2e/globalHistoryPage.cy.ts',
-            'cypress/e2e/globalHistoryFilters.cy.ts',
-            'cypress/e2e/globalHistoryFiltersPage.cy.ts',
-            'cypress/e2e/globalHistorySort.cy.ts',
-            'cypress/e2e/globalHistorySortPage.cy.ts',
-            'cypress/e2e/globalHistoryColumns.cy.ts',
-            'cypress/e2e/globalHistoryLocate.cy.ts',
-            'cypress/e2e/globalHistoryZTeardown.cy.ts'
+            'cypress/e2e/siteHistory0Setup.cy.ts',
+            'cypress/e2e/siteHistoryScope.cy.ts',
+            'cypress/e2e/siteHistoryPagination.cy.ts',
+            'cypress/e2e/siteHistoryPermission.cy.ts',
+            'cypress/e2e/siteHistoryPage.cy.ts',
+            'cypress/e2e/siteHistoryFilters.cy.ts',
+            'cypress/e2e/siteHistoryFiltersPage.cy.ts',
+            'cypress/e2e/siteHistorySort.cy.ts',
+            'cypress/e2e/siteHistorySortPage.cy.ts',
+            'cypress/e2e/siteHistoryColumns.cy.ts',
+            'cypress/e2e/siteHistoryLocate.cy.ts',
+            'cypress/e2e/siteHistoryZTeardown.cy.ts'
         ],
         excludeSpecPattern: '*.ignore.ts',
         baseUrl: process.env.CYPRESS_BASE_URL || process.env.JAHIA_URL || 'http://jahia:8080'
