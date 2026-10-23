@@ -135,6 +135,12 @@
   width: 160px;
 }
 
+/* The clear button and the tags are taller than the label, so one centered line of fixed height keeps the box of the empty Dropdown. */
+.actionFilter :global(.moonstone-dropdown) {
+  flex-wrap: nowrap;
+  height: 26px;
+}
+
 .actionFilter :global(.moonstone-dropdown_tags) {
   flex-wrap: nowrap;
   overflow: hidden;
