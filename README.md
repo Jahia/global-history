@@ -141,6 +141,7 @@ These variables list the rows of the user names in alphabetical order:
 - A moved node keeps the old path on its old rows. Those rows stay listed under the old path.
 - The module filters no row by ACL. A user with `viewSiteHistory` on the site sees every row of the site, including the rows of a node that the user cannot read.
 - The table includes the `accessed` rows. Jahia writes one `accessed` row on each read of a file, and guest reads count too.
+- The module hides the rows of the properties `j:lastPublished` and `j:lastPublishedBy`, and `totalCount` does not count them. A publication writes a row of each property for each published node, and the `published` row of the node stays listed.
 - Jahia 8.2.4.0 deletes the rows that are older than 13 months. On Jahia 8.2.3, a purge in December keeps 1 year of rows.
 - Jahia does not log the actions of the user `system`. A script that runs as `system`, such as a Groovy script, leaves no row.
 - Jahia records the `default` workspace only. An edit made in the `live` workspace leaves no row.
