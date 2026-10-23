@@ -1,6 +1,9 @@
 import {
     AUTHOR,
+    CONTENT_FOLDER,
+    CONTENT_FOLDER_PATH,
     DEFAULT_COLUMN_LABELS,
+    HistoryFilter,
     historyTotal,
     isInScope,
     PAGE_SIZE,
@@ -17,17 +20,19 @@ const NEXT_PAGE = `${TABLE} [data-testid="pagination-button-next-page"]`;
 const NO_MATCH = '[data-sel-role="site-history-no-match"]';
 const ERROR = '[data-sel-role="site-history-error"]';
 const PATH_FILTER = '[data-sel-role="filter-path"]';
+const PATH_PICKER_BUTTON = '[data-sel-role="filter-path-picker"]';
 const ACTION_FILTER = '[data-sel-role="filter-action"]';
 const DATE_FROM = '[data-sel-role="filter-date-from"]';
 const DATE_TO = '[data-sel-role="filter-date-to"]';
 const USER_FILTER = '[data-sel-role="filter-user"]';
-const USER_FILTER_CLEAR = '[data-sel-role="filter-user-clear"]';
-const USER_FILTER_EMPTY = `${USER_FILTER} [data-testid="emptyCardSelector-label"]`;
-const USER_FILTER_NAME = `${USER_FILTER} [data-testid="cardSelector-displayName"]`;
+const USER_PICKER_BUTTON = '[data-sel-role="filter-user-picker"]';
 const CLEAR_FILTERS = '[data-sel-role="filter-clear"]';
 const COLUMN_CHOICE = '[data-sel-role="column-choice"]';
 const FILTER_CONTROLS = [DATE_FROM, DATE_TO, USER_FILTER, PATH_FILTER, ACTION_FILTER, CLEAR_FILTERS, COLUMN_CHOICE];
 const PICKER = '[data-sel-role="picker-dialog"][data-sel-type="user"]';
+const EDITORIAL_PICKER = '[data-sel-role="picker-dialog"][data-sel-type="editorial"]';
+const CONTENT_FOLDERS_ACCORDION =
+    'section[data-registry-key="accordionItem:picker-content-folders"] header[role="accordion-item"]';
 const PICKER_SEARCH = `${PICKER} input[role="searchbox"]`;
 const PICKER_SELECTION = `${PICKER} [data-cm-role="selection-caption"]`;
 const PAGE = '[data-sel-role="site-history"]';
@@ -38,7 +43,20 @@ const UI_LOCALE = 'en';
 const textsOf = ($elements: JQuery<HTMLElement>) =>
     Cypress.$.makeArray($elements).map(element => (element.textContent ?? '').trim());
 
+const outsideOf = (paths: string[], scopePath: string): string[] => paths.filter(path => !isInScope(path, scopePath));
+
 const cellsOf = (columnLabel: string) => `${ROWS} td:nth-child(${DEFAULT_COLUMN_LABELS.indexOf(columnLabel) + 1})`;
+
+// The data-sel-role of a moonstone Input sits on the input element, inside the box that holds its buttons.
+const clearField = (selector: string) =>
+    cy.get(selector).closest('.moonstone-baseInput').find('[aria-label="Reset"]').click();
+
+// The commands fill the array before cy.wrap yields it.
+const totalsOf = (...filters: HistoryFilter[]): Cypress.Chainable<number[]> => {
+    const totals: number[] = [];
+    filters.forEach(filter => historyTotal(SITE_PATH, filter).then(count => totals.push(count)));
+    return cy.wrap(totals);
+};
 
 const boxOf = (element: HTMLElement): DOMRect => element.getBoundingClientRect();
 
@@ -67,16 +85,38 @@ const typeDate = (selector: string, date: Date) => {
     cy.get(selector).should('have.value', text);
 };
 
-// The jContent user picker searches after 3 characters. With several users allowed, the checkbox of a row selects the user.
+const pickerCheckbox = (username: string) =>
+    `${PICKER} [data-cm-role="table-content-list-row"][data-sel-name="${username}"] [data-cm-role="table-content-list-cell-selection"] input`;
+
+// The jContent user picker searches after 3 characters. With several users allowed, the checkbox of a row toggles the user.
+const toggleUserInPicker = (username: string, checked: boolean) => {
+    cy.get(PICKER_SEARCH, {timeout: LOAD_TIMEOUT}).should('be.visible').clear();
+    cy.get(PICKER_SEARCH).type(username, {delay: 100});
+    cy.get(pickerCheckbox(username), {timeout: LOAD_TIMEOUT}).click();
+    cy.get(pickerCheckbox(username)).should('have.attr', 'aria-checked', String(checked));
+};
+
 const pickUser = (username: string) => {
-    const checkbox = `${PICKER} [data-cm-role="table-content-list-row"][data-sel-name="${username}"] [data-cm-role="table-content-list-cell-selection"] input`;
-    cy.get(USER_FILTER).click();
-    cy.get(PICKER_SEARCH, {timeout: LOAD_TIMEOUT}).should('be.visible').type(username, {delay: 100});
-    cy.get(checkbox, {timeout: LOAD_TIMEOUT}).click();
-    cy.get(checkbox).should('have.attr', 'aria-checked', 'true');
+    cy.get(USER_PICKER_BUTTON).click();
+    toggleUserInPicker(username, true);
     cy.get(`${PICKER_SELECTION} [data-sel-role="1-item-selected"]`).should('be.visible');
     cy.get(`${PICKER} [data-sel-picker-dialog-action="done"]`).click();
     cy.get(PICKER).should('not.exist');
+};
+
+// The editorial picker opens on the Pages accordion. It selects a folder 300 ms after a click, because a double-click opens the folder.
+const pickContentFolder = (folderName: string) => {
+    cy.get(PATH_PICKER_BUTTON).click();
+    cy.get(EDITORIAL_PICKER, {timeout: LOAD_TIMEOUT}).should('be.visible');
+    cy.get(CONTENT_FOLDERS_ACCORDION).click();
+    cy.get(`${EDITORIAL_PICKER} [data-cm-role="table-content-list-row"][data-sel-name="${folderName}"]`, {
+        timeout: LOAD_TIMEOUT
+    }).click();
+    cy.get(`${EDITORIAL_PICKER} [data-cm-role="selection-caption"] [data-sel-role="item-selected"]`).should(
+        'be.visible'
+    );
+    cy.get(`${EDITORIAL_PICKER} [data-sel-picker-dialog-action="done"]`).click();
+    cy.get(EDITORIAL_PICKER).should('not.exist');
 };
 
 // The table keeps the previous rows while a query runs, and aria-busy marks that state.
@@ -145,9 +185,8 @@ describe('Site history filters', () => {
         cy.get(`${ACTION_FILTER} .moonstone-tag`).should('have.length', 3);
         cy.get(FILTERS).should($filters => {
             const action = boxOf($filters.find(ACTION_FILTER)[0]);
-            const user = boxOf($filters.find(USER_FILTER)[0]);
             expect(action.width, 'width of the action filter').to.be.closeTo(160, 0.5);
-            expect(action.height, 'height of the action filter').to.be.closeTo(user.height, 0.5);
+            expect(action.height, 'height of the action filter').to.be.closeTo(26, 0.5);
         });
     });
 
@@ -199,10 +238,24 @@ describe('Site history filters', () => {
         cy.get(cellsOf('Path')).should($cells => {
             const paths = textsOf($cells);
             expect(paths, 'Path cells').not.to.be.empty;
-            expect(
-                paths.filter(path => !isInScope(path, TEXT_1_PATH)),
-                `paths outside ${TEXT_1_PATH}`
-            ).to.deep.equal([]);
+            expect(outsideOf(paths, TEXT_1_PATH), `paths outside ${TEXT_1_PATH}`).to.deep.equal([]);
+        });
+    });
+
+    it('lists the rows of the node picked in the editorial picker and of the nodes below it', () => {
+        historyTotal(SITE_PATH, {path: CONTENT_FOLDER_PATH}).then(folderTotal => {
+            expect(folderTotal, `rows of ${CONTENT_FOLDER_PATH}`).to.be.above(0).and.below(total);
+            pickContentFolder(CONTENT_FOLDER);
+            cy.get(PATH_FILTER).should('have.value', CONTENT_FOLDER_PATH);
+            waitForFilteredRows();
+            cy.get(TOTAL_ITEMS)
+                .invoke('text')
+                .should('match', new RegExp(` of ${folderTotal}$`));
+            cy.get(cellsOf('Path')).should($cells => {
+                const paths = textsOf($cells);
+                expect(paths, 'Path cells').to.include(`${CONTENT_FOLDER_PATH}/text-1`);
+                expect(outsideOf(paths, CONTENT_FOLDER_PATH), `paths outside ${CONTENT_FOLDER_PATH}`).to.deep.equal([]);
+            });
         });
     });
 
@@ -213,12 +266,42 @@ describe('Site history filters', () => {
         );
     });
 
+    it('lists the rows of the user keys typed in the user filter', () => {
+        totalsOf({userKeys: ['root']}, {userKeys: [AUTHOR.username]}).then(([rootTotal, authorTotal]) => {
+            expect(rootTotal, 'rows of root').to.be.above(0);
+            expect(authorTotal, 'rows of sh-author').to.be.above(0);
+            // The field drops the blanks and the duplicates of the typed list.
+            cy.get(USER_FILTER).type(` root ,, ${AUTHOR.username}, root{enter}`);
+            cy.get(USER_FILTER).should('have.value', `root, ${AUTHOR.username}`);
+            waitForFilteredRows();
+            cy.get(TOTAL_ITEMS)
+                .invoke('text')
+                .should('match', new RegExp(` of ${rootTotal + authorTotal}$`));
+            cy.get(cellsOf('User')).should($cells => {
+                const users = Cypress._.uniq(textsOf($cells));
+                expect(users, 'User cells').not.to.be.empty;
+                expect(Cypress._.without(users, 'root', AUTHOR.username), 'other users').to.deep.equal([]);
+            });
+
+            // A key matches a whole user name, so the start of a user name matches no row.
+            cy.get(USER_FILTER).clear();
+            cy.get(USER_FILTER).type('root, sh-auth{enter}');
+            cy.get(TOTAL_ITEMS, {timeout: LOAD_TIMEOUT})
+                .invoke('text')
+                .should('match', new RegExp(` of ${rootTotal}$`));
+            cy.get(cellsOf('User')).should($cells => {
+                expect(Cypress._.uniq(textsOf($cells)), 'User cells').to.deep.equal(['root']);
+            });
+        });
+    });
+
     it('lists the rows of the user picked in the jContent user picker', () => {
         historyTotal(SITE_PATH, {userKeys: [AUTHOR.username]}).then(authorTotal => {
             expect(authorTotal, 'rows of sh-author').to.be.above(0).and.below(total);
-            cy.get(USER_FILTER_EMPTY).should('have.text', 'User');
+            cy.get(USER_FILTER).should('have.value', '');
 
             pickUser(AUTHOR.username);
+            cy.get(USER_FILTER).should('have.value', AUTHOR.username);
             waitForFilteredRows();
             cy.get(TOTAL_ITEMS)
                 .invoke('text')
@@ -228,26 +311,53 @@ describe('Site history filters', () => {
                 expect(users, 'User cells').not.to.be.empty;
                 expect(Cypress._.uniq(users), 'User cells').to.deep.equal([AUTHOR.username]);
             });
-            cy.get(USER_FILTER_NAME).should('have.text', AUTHOR.username);
 
-            // A click on the card opens the picker on the current selection.
-            cy.get(USER_FILTER).click();
+            // The picker opens on the picked users, and Cancel keeps the filter.
+            cy.get(USER_PICKER_BUTTON).click();
             cy.get(`${PICKER_SELECTION} [data-sel-role="1-item-selected"]`, {timeout: LOAD_TIMEOUT}).should(
                 'be.visible'
             );
             cy.get(`${PICKER} [data-sel-picker-dialog-action="cancel"]`).click();
             cy.get(PICKER).should('not.exist');
-            cy.get(TOTAL_ITEMS)
-                .invoke('text')
-                .should('match', new RegExp(` of ${authorTotal}$`));
+            cy.get(USER_FILTER).should('have.value', AUTHOR.username);
 
-            cy.get(USER_FILTER_CLEAR).click();
-            cy.get(PICKER).should('not.exist');
+            clearField(USER_FILTER);
             cy.get(TOTAL_ITEMS, {timeout: LOAD_TIMEOUT})
                 .invoke('text')
                 .should('match', new RegExp(`^1-${PAGE_SIZE} of ${total}$`));
-            cy.get(USER_FILTER_EMPTY).should('have.text', 'User');
+            cy.get(USER_FILTER).should('have.value', '');
             cy.get(CLEAR_FILTERS).should('be.disabled');
+        });
+    });
+
+    it('adds the picked users to the typed user keys, and removes a user unselected in the picker', () => {
+        totalsOf({userKeys: ['root']}, {userKeys: [AUTHOR.username]}).then(([rootTotal, authorTotal]) => {
+            cy.get(USER_FILTER).type('root{enter}');
+            waitForFilteredRows();
+            cy.get(TOTAL_ITEMS)
+                .invoke('text')
+                .should('match', new RegExp(` of ${rootTotal}$`));
+
+            pickUser(AUTHOR.username);
+            cy.get(USER_FILTER).should('have.value', `root, ${AUTHOR.username}`);
+            cy.get(TOTAL_ITEMS, {timeout: LOAD_TIMEOUT})
+                .invoke('text')
+                .should('match', new RegExp(` of ${rootTotal + authorTotal}$`));
+
+            // The typed key has no node, so the picker opens on sh-author alone. The picker refuses an empty selection.
+            cy.get(USER_PICKER_BUTTON).click();
+            cy.get(`${PICKER_SELECTION} [data-sel-role="1-item-selected"]`, {timeout: LOAD_TIMEOUT}).should(
+                'be.visible'
+            );
+            toggleUserInPicker('root', true);
+            toggleUserInPicker(AUTHOR.username, false);
+            cy.get(`${PICKER_SELECTION} [data-sel-role="1-item-selected"]`).should('be.visible');
+            cy.get(`${PICKER} [data-sel-picker-dialog-action="done"]`).click();
+            cy.get(PICKER).should('not.exist');
+            cy.get(USER_FILTER).should('have.value', 'root');
+            cy.get(TOTAL_ITEMS, {timeout: LOAD_TIMEOUT})
+                .invoke('text')
+                .should('match', new RegExp(` of ${rootTotal}$`));
         });
     });
 
@@ -264,7 +374,7 @@ describe('Site history filters', () => {
                 .invoke('text')
                 .should('match', new RegExp(`^${PAGE_SIZE + 1}-\\d+ of ${rootTotal}$`));
 
-            cy.get(USER_FILTER).click();
+            cy.get(USER_PICKER_BUTTON).click();
             cy.get(`${PICKER_SELECTION} [data-sel-role="1-item-selected"]`, {timeout: LOAD_TIMEOUT}).should(
                 'be.visible'
             );
@@ -280,13 +390,13 @@ describe('Site history filters', () => {
     it('clears the user filter with the other filters', () => {
         pickUser(AUTHOR.username);
         waitForFilteredRows();
-        cy.get(USER_FILTER_NAME).should('have.text', AUTHOR.username);
+        cy.get(USER_FILTER).should('have.value', AUTHOR.username);
 
         cy.get(CLEAR_FILTERS).click();
         cy.get(TOTAL_ITEMS, {timeout: LOAD_TIMEOUT})
             .invoke('text')
             .should('match', new RegExp(`^1-${PAGE_SIZE} of ${total}$`));
-        cy.get(USER_FILTER_EMPTY).should('have.text', 'User');
+        cy.get(USER_FILTER).should('have.value', '');
         cy.get(CLEAR_FILTERS).should('be.disabled');
     });
 

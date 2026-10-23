@@ -1,21 +1,20 @@
 import {
+  AddPerson,
   Button,
-  CardSelector,
   Close,
   DateTimeInput,
   Dropdown,
-  EmptyCardSelector,
+  FolderOpen,
   Input,
-  Person,
   type Temporal,
 } from "@jahia/moonstone";
 import type { ColumnFiltersState, VisibilityState } from "@tanstack/react-table";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { NAMESPACE } from "../i18n.ts";
 import { ColumnChoice } from "./ColumnChoice.tsx";
 import { ACTION_CONFIG } from "./columns.tsx";
-import { filterValue, type DateRange } from "./filters.ts";
+import { filterValue, parseUserKeys, type DateRange } from "./filters.ts";
 import styles from "./SiteHistoryApp.module.css";
 
 type SetFilter = (id: string, value: unknown) => void;
@@ -23,10 +22,31 @@ type SetFilter = (id: string, value: unknown) => void;
 // The moonstone typings drop the null that DateTimeInput emits when the user clears the field.
 const toDay = (value: Temporal.PlainDate | null): string => value?.toString() ?? "";
 
-type PathFilterProps = Readonly<{ filters: ColumnFiltersState; sitePath: string; onChange: SetFilter }>;
+type PickerButtonProps = Readonly<{ icon: ReactElement; label: string; role: string; onClick: () => void }>;
 
-const PathFilter = ({ filters, sitePath, onChange }: PathFilterProps) => {
+const PickerButton = ({ icon, label, role, onClick }: PickerButtonProps) => (
+    <Button
+    variant="ghost"
+    size="small"
+    icon={icon}
+    aria-label={label}
+    title={label}
+    data-sel-role={role}
+    onClick={onClick}
+  />
+);
+
+type PathFilterProps = Readonly<{
+  filters: ColumnFiltersState;
+  siteKey: string;
+  sitePath: string;
+  language: string;
+  onChange: SetFilter;
+}>;
+
+const PathFilter = ({ filters, siteKey, sitePath, language, onChange }: PathFilterProps) => {
   const { t } = useTranslation(NAMESPACE);
+  const openPicker = globalThis.CE_API?.openPicker;
   const path = filterValue<string>(filters, "path") ?? "";
   const [draft, setDraft] = useState(path);
   useEffect(() => setDraft(path), [path]);
@@ -37,6 +57,14 @@ const PathFilter = ({ filters, sitePath, onChange }: PathFilterProps) => {
     }
   };
 
+  const open = () =>
+    openPicker?.({
+      type: "editorial",
+      site: siteKey,
+      lang: language,
+      setValue: ([node]) => node && commit(node.path),
+    });
+
   return (
       <Input
       className={styles.pathFilter}
@@ -44,6 +72,17 @@ const PathFilter = ({ filters, sitePath, onChange }: PathFilterProps) => {
       placeholder={t("siteHistory.filters.path", { example: `${sitePath}/home`, interpolation: { escapeValue: false } })}
       aria-label={t("siteHistory.columns.path")}
       data-sel-role="filter-path"
+      postfixComponents={
+        openPicker && [
+            <PickerButton
+            key="picker"
+            icon={<FolderOpen/>}
+            label={t("siteHistory.filters.pickPath")}
+            role="filter-path-picker"
+            onClick={open}
+          />,
+        ]
+      }
       onChange={event => setDraft(event.target.value)}
       onKeyUp={event => {
         if (event.key === "Enter") {
@@ -59,7 +98,7 @@ const PathFilter = ({ filters, sitePath, onChange }: PathFilterProps) => {
   );
 };
 
-export type PickedUser = Readonly<{ name: string; label: string; uuid?: string; path?: string }>;
+export type PickedUser = Readonly<{ name: string; uuid: string; path: string }>;
 
 type UserFilterProps = Readonly<{
   filters: ColumnFiltersState;
@@ -73,79 +112,63 @@ type UserFilterProps = Readonly<{
 const UserFilter = ({ filters, pickedUsers, siteKey, language, onChange, onPick }: UserFilterProps) => {
   const { t } = useTranslation(NAMESPACE);
   const openPicker = globalThis.CE_API?.openPicker;
-  if (!openPicker) {
-    return null;
-  }
-
   const userKeys = filterValue<string[]>(filters, "user") ?? [];
-  // A site user and a global user can share a user name, so one key can match several picked users.
-  const users = userKeys.flatMap(name => {
-    const matches = pickedUsers.filter(user => user.name === name);
-    return matches.length > 0 ? matches : [{ name, label: name }];
-  });
+  // The effect depends on the text, because a missing filter gives a new empty array on every render.
+  const text = userKeys.join(", ");
+  const [draft, setDraft] = useState(text);
+  useEffect(() => setDraft(text), [text]);
+
+  const commit = (keys: string[]) => {
+    setDraft(keys.join(", "));
+    if (keys.join(", ") !== text) {
+      onChange("user", keys);
+    }
+  };
+
+  // A typed key has no node, so the picker preselects only the users that it returned before.
+  const preselected = pickedUsers.filter(user => userKeys.includes(user.name));
 
   const open = () =>
-    openPicker({
+    openPicker?.({
       type: "user",
       site: siteKey,
       lang: language,
       isMultiple: true,
-      value: users.flatMap(({ uuid, path }) => (uuid && path ? [{ uuid, path }] : [])),
+      value: preselected.map(({ uuid, path }) => ({ uuid, path })),
       setValue: nodes => {
-        onPick(
-          nodes.map(node => ({
-            name: node.name,
-            label:
-              [node.firstName?.value, node.lastName?.value].filter(Boolean).join(" ") || node.displayName || node.name,
-            uuid: node.uuid,
-            path: node.path,
-          })),
-        );
-        // The picker calls setValue on DONE even when the selection did not change.
-        const names = [...new Set(nodes.map(node => node.name))];
-        if (names.length !== userKeys.length || names.some(name => !userKeys.includes(name))) {
-          onChange("user", names);
-        }
+        onPick(nodes.map(({ name, uuid, path }) => ({ name, uuid, path })));
+        // The picked users replace the preselected users, so a user unselected in the picker leaves the list.
+        const typed = userKeys.filter(key => !preselected.some(user => user.name === key));
+        commit([...new Set([...typed, ...nodes.map(node => node.name)])]);
       },
     });
 
-  if (users.length === 0) {
-    return (
-        <EmptyCardSelector
-        id="site-history-filter-user"
-        className={styles.userFilter}
-        iconStart={<Person/>}
-        label={t("siteHistory.filters.user")}
-        data-sel-role="filter-user"
-        onClick={open}
-      />
-    );
-  }
-
   return (
-      <CardSelector
-      id="site-history-filter-user"
+      <Input
       className={styles.userFilter}
-      thumbnail={<Person/>}
-      thumbnailType="icon"
-      displayName={users.map(user => user.label).join(", ")}
-      systemName={users.length === 1 ? users[0].name : undefined}
-      title={users.map(user => (user.label === user.name ? user.name : `${user.label} (${user.name})`)).join(", ")}
+      value={draft}
+      placeholder={t("siteHistory.filters.user")}
+      aria-label={t("siteHistory.columns.user")}
       data-sel-role="filter-user"
-      cardAction={
-          <Button
-          variant="ghost"
-          icon={<Close/>}
-          aria-label={t("siteHistory.filters.clearUsers")}
-          data-sel-role="filter-user-clear"
-          onClick={event => {
-            // The action sits inside the card, and a click that reaches the card opens the picker.
-            event.stopPropagation();
-            onChange("user", []);
-          }}
-        />
+      postfixComponents={
+        openPicker && [
+            <PickerButton
+            key="picker"
+            icon={<AddPerson/>}
+            label={t("siteHistory.filters.pickUsers")}
+            role="filter-user-picker"
+            onClick={open}
+          />,
+        ]
       }
-      onClick={open}
+      onChange={event => setDraft(event.target.value)}
+      onKeyUp={event => {
+        if (event.key === "Enter") {
+          commit(parseUserKeys(draft));
+        }
+      }}
+      onBlur={() => commit(parseUserKeys(draft))}
+      onClear={() => commit([])}
     />
   );
 };
@@ -276,7 +299,7 @@ export const HistoryFilters = ({
         onChange={onChange}
         onPick={onPickUsers}
       />
-        <PathFilter filters={filters} sitePath={sitePath} onChange={onChange}/>
+        <PathFilter filters={filters} siteKey={siteKey} sitePath={sitePath} language={language} onChange={onChange}/>
         <ActionFilter filters={filters} onChange={onChange}/>
         <ClearFilters filters={filters} onClear={onClear}/>
         <ColumnChoice columns={columns} visibility={columnVisibility} onChange={onColumnVisibilityChange}/>

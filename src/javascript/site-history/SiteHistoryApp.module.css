@@ -126,7 +126,9 @@
 }
 
 /* The doubled class outranks the width: 100% that moonstone gives every Input. */
-.pathFilter.pathFilter {
+.pathFilter.pathFilter,
+.userFilter.userFilter {
+  flex: none;
   width: 240px;
 }
 
@@ -144,35 +146,4 @@
 .actionFilter :global(.moonstone-dropdown_tags) {
   flex-wrap: nowrap;
   overflow: hidden;
-}
-
-/* The doubled class outranks the full width, the 58px height and the dashed border of the moonstone cards, so the card has the box of the small outlined Dropdown. */
-.userFilter.userFilter {
-  flex: none;
-  justify-content: flex-start;
-  width: 200px;
-  height: 26px;
-  min-height: 26px;
-  padding: 0 8px;
-  border-style: solid;
-}
-
-.userFilter :global(.moonstone-thumbnail) {
-  width: 16px;
-  min-width: 16px;
-  height: 16px;
-}
-
-.userFilter :global(.moonstone-typography) {
-  font-size: 12px;
-}
-
-/* The empty card reads as a placeholder, like the other fields of the row. */
-:global(.moonstone-emptyCardSelector).userFilter :global(.moonstone-typography) {
-  font-style: italic;
-}
-
-/* A moonstone card caps its name at half its width, and this card lists every selected user on one line. */
-.userFilter :global(.moonstone-cardSelector_displayName) {
-  max-width: none;
 }
