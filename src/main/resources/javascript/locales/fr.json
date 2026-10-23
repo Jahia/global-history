@@ -8,6 +8,7 @@
       "user": "Utilisateur",
       "action": "Action",
       "name": "Nom",
+      "contentType": "Type de contenu",
       "property": "Propriété",
       "language": "Langue",
       "locate": "Localiser",

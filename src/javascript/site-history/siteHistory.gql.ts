@@ -7,6 +7,12 @@ export type HistoryUser = {
   displayName: string | null;
 };
 
+export type HistoryNodeType = {
+  name: string;
+  displayName: string | null;
+  icon: string | null;
+};
+
 // The page query skips the fields of a hidden column, so every field but id can be missing.
 export type HistoryEntry = {
   id: string;
@@ -22,6 +28,7 @@ export type HistoryEntry = {
   nodeExists?: boolean | null;
   nodeName?: string | null;
   nodeNameDisplay?: string | null;
+  primaryNodeType?: HistoryNodeType | null;
   user?: HistoryUser | null;
 };
 
@@ -58,6 +65,7 @@ export type ColumnIncludes = {
   showDate: boolean;
   showUser: boolean;
   showName: boolean;
+  showContentType: boolean;
   showProperty: boolean;
   showLanguage: boolean;
   showAction: boolean;
@@ -86,6 +94,7 @@ export const SITE_HISTORY_QUERY = gql`
     $showDate: Boolean!
     $showUser: Boolean!
     $showName: Boolean!
+    $showContentType: Boolean!
     $showProperty: Boolean!
     $showLanguage: Boolean!
     $showAction: Boolean!
@@ -114,6 +123,11 @@ export const SITE_HISTORY_QUERY = gql`
             nodeExists @include(if: $showName)
             nodeName @include(if: $showName)
             nodeNameDisplay(language: $uiLanguage) @include(if: $showName)
+            primaryNodeType @include(if: $showContentType) {
+              name
+              displayName(language: $uiLanguage)
+              icon
+            }
             user @include(if: $showUser) {
               username
               firstname

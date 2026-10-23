@@ -5,9 +5,11 @@ import {
   Delete,
   Edit,
   HandleMove,
+  IconTextIcon,
   Language,
   NoCloud,
   Pill,
+  toIconComponent,
   Typography,
   Visibility,
 } from "@jahia/moonstone";
@@ -41,6 +43,7 @@ export type HistoryTableRow = {
   user: string;
   action: string;
   name: string;
+  contentType: string;
   property: string;
   language: string;
   locate: string;
@@ -50,6 +53,8 @@ export type HistoryTableRow = {
   nodeExists: boolean;
   isDeleted: boolean;
   systemName: string;
+  contentTypeName: string;
+  contentTypeIcon: string;
   propertyName: string;
 };
 
@@ -73,6 +78,7 @@ export const toRow = (entry: HistoryEntry, uiLanguage: string): HistoryTableRow 
   user: userDisplayName(entry),
   action: entry.action ?? "",
   name: entry.nodeNameDisplay || entry.nodeName || "",
+  contentType: entry.primaryNodeType?.displayName || entry.primaryNodeType?.name || "",
   property: entry.propertyName ? entry.propertyNameDisplay || entry.propertyName : "",
   language: entry.language ?? "",
   locate: entry.uuid ?? "",
@@ -83,6 +89,8 @@ export const toRow = (entry: HistoryEntry, uiLanguage: string): HistoryTableRow 
   // The page query loads nodeExists with the Name column only, so a missing value is unknown.
   isDeleted: entry.nodeExists === false,
   systemName: entry.nodeName ?? "",
+  contentTypeName: entry.primaryNodeType?.name ?? "",
+  contentTypeIcon: entry.primaryNodeType?.icon ?? "",
   propertyName: entry.propertyName ?? "",
 });
 
@@ -115,6 +123,18 @@ const withTechnicalName = (label: string, technicalName: string, isScrollable = 
     </Typography>
 );
 
+// The icon of a node type is the path of a PNG file without its extension, as the lists of jContent read it.
+const withTypeIcon = (label: string, technicalName: string, icon: string) => (
+    <IconTextIcon
+    iconStart={icon ? toIconComponent(`${icon}.png`) : undefined}
+    iconSize="small"
+    typographyProps={{ variant: "caption" }}
+    title={technicalName && technicalName !== label ? `${label} (${technicalName})` : label}
+    >
+        {label}
+    </IconTextIcon>
+);
+
 const columnDefinitions = (t: Translate, language: string): HistoryColumn[] => [
   {
     key: "date",
@@ -135,6 +155,12 @@ const columnDefinitions = (t: Translate, language: string): HistoryColumn[] => [
     label: t("siteHistory.columns.name"),
     width: "300px",
     render: ({ data }) => (data.nodeExists ? withTechnicalName(data.name, data.systemName, true) : caption(NO_NODE)),
+  },
+  {
+    key: "contentType",
+    label: t("siteHistory.columns.contentType"),
+    width: "160px",
+    render: ({ data }) => (data.contentType ? withTypeIcon(data.contentType, data.contentTypeName, data.contentTypeIcon) : ""),
   },
   {
     key: "property",

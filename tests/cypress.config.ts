@@ -31,6 +31,7 @@ export default defineConfig({
             'cypress/e2e/siteHistorySort.cy.ts',
             'cypress/e2e/siteHistorySortPage.cy.ts',
             'cypress/e2e/siteHistoryColumns.cy.ts',
+            'cypress/e2e/siteHistoryContentType.cy.ts',
             'cypress/e2e/siteHistoryLocate.cy.ts',
             'cypress/e2e/siteHistoryZTeardown.cy.ts'
         ],
