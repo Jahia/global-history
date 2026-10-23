@@ -30,6 +30,13 @@ The GraphQL field checks `viewSiteHistory` on the node it is called on. A user w
 
 The module adds the permission `viewSiteHistory` under the `site-admin` permission group. The `site-administrator` role holds `site-admin`, and the module grants `viewSiteHistory` to the `server-administrator` role. The jContent History tab of a node keeps its own permission, `viewHistoryTab`, so a user with `viewHistoryTab` alone does not see the Site history.
 
+## Action bar
+
+The action bar under the page title holds the Refresh button and the Clear filters button.
+
+- Refresh loads the total and the rows of the table again, with the same page, sort and filters. The table shows its loader until the rows arrive. When the page on screen is past the last page, the table shows the last page.
+- Clear filters removes every filter and returns the table to page 1. The button is disabled while no filter is set.
+
 ## Columns
 
 The table has 10 columns and shows the newest row first. A page shows 100 rows, and you can choose 20 or 50 rows instead.

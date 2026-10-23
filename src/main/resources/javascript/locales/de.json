@@ -3,6 +3,7 @@
   "siteHistory": {
     "nav": "Website-Verlauf",
     "title": "Website-Verlauf: {{siteName}}",
+    "refresh": "Aktualisieren",
     "columns": {
       "date": "Datum",
       "user": "Benutzer",

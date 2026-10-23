@@ -1,7 +1,6 @@
 import {
   AddPerson,
   Button,
-  Close,
   DateTimeInput,
   Dropdown,
   FolderOpen,
@@ -243,23 +242,6 @@ const DateRangeFilter = ({ filters, locale, onChange }: DateRangeFilterProps) =>
   );
 };
 
-type ClearFiltersProps = Readonly<{ filters: ColumnFiltersState; onClear: () => void }>;
-
-const ClearFilters = ({ filters, onClear }: ClearFiltersProps) => {
-  const { t } = useTranslation(NAMESPACE);
-  return (
-      <Button
-      className={styles.clearFilters}
-      variant="ghost"
-      icon={<Close/>}
-      label={t("siteHistory.filters.clear")}
-      isDisabled={filters.length === 0}
-      data-sel-role="filter-clear"
-      onClick={onClear}
-    />
-  );
-};
-
 type HistoryFiltersProps = Readonly<{
   columns: ReadonlyArray<{ key: string; label: string }>;
   columnVisibility: VisibilityState;
@@ -271,7 +253,6 @@ type HistoryFiltersProps = Readonly<{
   locale: string;
   onChange: SetFilter;
   onPickUsers: (users: PickedUser[]) => void;
-  onClear: () => void;
   onColumnVisibilityChange: (visibility: VisibilityState) => void;
 }>;
 
@@ -286,7 +267,6 @@ export const HistoryFilters = ({
   locale,
   onChange,
   onPickUsers,
-  onClear,
   onColumnVisibilityChange,
 }: HistoryFiltersProps) => (
     <div className={styles.filters} data-sel-role="site-history-filters">
@@ -301,7 +281,6 @@ export const HistoryFilters = ({
       />
         <PathFilter filters={filters} siteKey={siteKey} sitePath={sitePath} language={language} onChange={onChange}/>
         <ActionFilter filters={filters} onChange={onChange}/>
-        <ClearFilters filters={filters} onClear={onClear}/>
         <ColumnChoice columns={columns} visibility={columnVisibility} onChange={onColumnVisibilityChange}/>
     </div>
 );

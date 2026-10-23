@@ -3,6 +3,7 @@
   "siteHistory": {
     "nav": "Site history",
     "title": "Site history: {{siteName}}",
+    "refresh": "Refresh",
     "columns": {
       "date": "Date",
       "user": "User",
