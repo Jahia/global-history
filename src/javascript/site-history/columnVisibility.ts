@@ -36,6 +36,7 @@ export const columnIncludes = (visibility: VisibilityState): ColumnIncludes => (
   showDate: isColumnVisible(visibility, "date"),
   showUser: isColumnVisible(visibility, "user"),
   showName: isColumnVisible(visibility, "name"),
+  showContentType: isColumnVisible(visibility, "contentType"),
   showProperty: isColumnVisible(visibility, "property"),
   showLanguage: isColumnVisible(visibility, "language"),
   showAction: isColumnVisible(visibility, "action"),

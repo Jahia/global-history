@@ -39,17 +39,18 @@ The action bar under the page title holds the Refresh button and the Clear filte
 
 ## Columns
 
-The table has 10 columns and shows the newest row first. A page shows 100 rows, and you can choose 20 or 50 rows instead.
+The table has 11 columns and shows the newest row first. A page shows 100 rows, and you can choose 20 or 50 rows instead.
 
 You can sort the table by the Date, User, Property, Action, Path, UUID or Message column. A click on the title of the column sorts the rows, and a second click reverses the order. The table returns to page 1 when the sort changes, and rows with an equal value show the newest row first. The User column sorts by user name, and the Property column sorts by property name. These names can differ from the text in the cell. The table returns to the newest row first after a reload, and when you hide the sorted column. The pager stays at the bottom of the table while you scroll the rows, and a new page opens on its first row.
 
-The column button at the right end of the filter row lists the visible columns and the hidden columns, and a click on a column shows or hides it. The UUID and Message columns are hidden until you show them. The browser keeps the choice in its local storage under the key `siteHistory.columns`, so another browser shows the default columns. The page query skips the fields of a hidden column, so a hidden User, Name or Property column saves a lookup per row.
+The column button at the right end of the filter row lists the visible columns and the hidden columns, and a click on a column shows or hides it. The UUID and Message columns are hidden until you show them. The browser keeps the choice in its local storage under the key `siteHistory.columns`, so another browser shows the default columns. The page query skips the fields of a hidden column, so a hidden User, Name, Content type or Property column saves a lookup per row.
 
 | Column | Content |
 |---|---|
 | Date | The date of the action, in the date format of the UI language. The module formats dates in English, French and German, and it uses English for any other UI language. |
 | User | The first name and the last name of the user, or the user name when the names are empty. |
 | Name | The display name of the node and its system name. A long name scrolls inside the cell. The cell shows a dash when the node no longer exists or the user cannot read it. |
+| Content type | The label of the primary type of the node in the UI language, and its icon, as the lists of jContent show them. A row of a translation node shows the type of its content node. The cell is empty when the node no longer exists or the user cannot read it. |
 | Property | The label and the name of the property, on a property row only. |
 | Language | The language of a row on a translation node or an i18n property, in upper case, for example `EN`. Other rows show a globe icon. |
 | Action | The action as a chip, for example Created, Modified, Published or Accessed. An unknown action shows as plain text. |
@@ -145,6 +146,7 @@ These variables list the rows of the user names in alphabetical order:
 
 ## Limits
 
+- The history table holds no node type, so the table cannot sort or filter the rows by content type.
 - A moved node keeps the old path on its old rows. Those rows stay listed under the old path.
 - The module filters no row by ACL. A user with `viewSiteHistory` on the site sees every row of the site, including the rows of a node that the user cannot read.
 - The table includes the `accessed` rows. Jahia writes one `accessed` row on each read of a file, and guest reads count too.

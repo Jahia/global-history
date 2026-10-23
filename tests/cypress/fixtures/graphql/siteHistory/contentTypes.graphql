@@ -1,0 +1,17 @@
+query siteHistoryContentTypes($path: String!, $language: String!) {
+    jcr {
+        nodeByPath(path: $path) {
+            siteHistory {
+                entries(offset: 0, limit: 100) {
+                    path
+                    action
+                    primaryNodeType {
+                        name
+                        displayName(language: $language)
+                        icon
+                    }
+                }
+            }
+        }
+    }
+}

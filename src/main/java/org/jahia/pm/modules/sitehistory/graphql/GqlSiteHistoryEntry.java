@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.modules.graphql.provider.dxm.DataFetchingException;
 import org.jahia.modules.graphql.provider.dxm.node.NodeHelper;
+import org.jahia.modules.graphql.provider.dxm.nodetype.GqlJcrNodeType;
 import org.jahia.pm.modules.sitehistory.history.HistoryPaths;
 import org.jahia.pm.modules.sitehistory.history.HistoryRow;
 import org.jahia.registries.ServicesRegistry;
@@ -168,6 +169,21 @@ public class GqlSiteHistoryEntry {
         }
         try {
             return node.getPrimaryNodeTypeName();
+        } catch (RepositoryException e) {
+            throw new DataFetchingException(e);
+        }
+    }
+
+    @GraphQLField
+    @GraphQLName("primaryNodeType")
+    @GraphQLDescription("The primary node type of the node. For a translation node, the type of its content node")
+    public GqlJcrNodeType getPrimaryNodeType() {
+        JCRNodeWrapper node = node();
+        if (node == null) {
+            return null;
+        }
+        try {
+            return new GqlJcrNodeType(node.getPrimaryNodeType());
         } catch (RepositoryException e) {
             throw new DataFetchingException(e);
         }

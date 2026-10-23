@@ -37,6 +37,7 @@ export const COLUMN_LABELS = [
     'Date',
     'User',
     'Name',
+    'Content type',
     'Property',
     'Language',
     'Action',

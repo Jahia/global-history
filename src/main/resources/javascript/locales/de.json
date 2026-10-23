@@ -9,6 +9,7 @@
       "user": "Benutzer",
       "action": "Aktion",
       "name": "Name",
+      "contentType": "Inhaltstyp",
       "property": "Eigenschaft",
       "language": "Sprache",
       "locate": "Finden",
