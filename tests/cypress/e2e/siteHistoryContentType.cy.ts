@@ -63,7 +63,7 @@ const typeCellsOf = (path: string) =>
 
 const expectTextType = (path: string) =>
     typeCellsOf(path).should($cells => {
-        expect($cells, `Content type cells of ${path}`).not.to.be.empty;
+        expect($cells.length, `Content type cells of ${path}`).to.be.greaterThan(0);
         $cells.each((_, cell) => {
             expect(cell.textContent.trim(), `Content type of ${path}`).to.equal(TEXT_LABEL.en);
             const icon = cell.querySelector('img');
@@ -129,7 +129,7 @@ describe('Site history Content type column', () => {
     it('leaves the cell empty for a deleted node', () => {
         visitHistory();
         typeCellsOf(DELETED_PATH).should($cells => {
-            expect($cells, `Content type cells of ${DELETED_PATH}`).not.to.be.empty;
+            expect($cells.length, `Content type cells of ${DELETED_PATH}`).to.be.greaterThan(0);
             $cells.each((_, cell) => {
                 expect(cell.textContent.trim(), `Content type of ${DELETED_PATH}`).to.equal('');
                 expect(cell.querySelector('img'), `icon of ${DELETED_PATH}`).to.equal(null);
