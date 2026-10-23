@@ -51,6 +51,15 @@ The column button at the right end of the filter row lists the visible columns a
 | UUID | The identifier of the node. |
 | Message | The workspaces of a publication, for example `default;;live`. |
 
+## Filters
+
+The filter row above the table holds the From and To dates, the User filter, the Path filter and the Action filter. A row must match every filter that is set, and the table returns to page 1 when a filter changes.
+
+- User: type user names separated by commas, such as `root, jdoe`, then press Enter or leave the field. The table keeps the rows of these users only. The icon at the right end of the field opens the user picker of jContent, and the picked users are added to the list. A user that you unselect in the picker leaves the list.
+- Path: type a path such as `/sites/digitall/home`, then press Enter or leave the field. The table keeps the rows of this node and of every node below it. The icon at the right end of the field opens the editorial picker of jContent, which lists the pages, the content folders and the content items of the site. The picked node sets the path.
+
+The editorial picker does not list the files, so you type the path of a file or of a folder under `/files`.
+
 ## GraphQL API
 
 The module adds the field `siteHistory` to the `JCRNode` type. The field returns the rows of the node and of every node below it:
@@ -141,10 +150,10 @@ These variables list the rows of the user names in alphabetical order:
 - A sort on any column except Date reads every row that matches the filters for each page, because no database index covers the other columns. On PostgreSQL, a sort by path also reads the large object of the path of each of these rows.
 - Each database sorts text with its own collation. MariaDB, MySQL and SQL Server put empty values first in ascending order, and PostgreSQL, Oracle and Derby put them last. On Oracle, a sort by path compares the first 1,000 characters of each path.
 - The first page of a site with few rows reads most of the date index. A filter that matches few rows has the same cost on any site. Jahia 8.2.3 and older have no date index.
-- The User filter opens the user picker of jContent, and the picker lists the existing users only. The rows of a deleted user stay in the table, but the User filter cannot select that user.
+- The user picker of jContent lists the existing users only. The rows of a deleted user stay in the table, and you type the user name to list them.
 - The user column holds the user name without its realm. A site user and a global user with the same user name share their rows.
 - MySQL, MariaDB and SQL Server often compare the user names without case. On these databases, `userKeys: ["jdoe"]` also selects the rows of the user `JDoe`.
-- The User filter calls `window.CE_API.openPicker`, which jContent sets and the Jahia Academy does not document. The page hides the User filter when jContent does not set this function.
+- The User filter and the Path filter call `window.CE_API.openPicker`, which jContent sets and the Jahia Academy does not document. The two fields hide their picker icon when jContent does not set this function.
 - The Locate link reads entries of the jContent registry that the Jahia Academy does not document: the `accordionItem` entries, `jcontent/utils` and the redux action `jcontentGoto`. It selects the node with the redux actions `CM_SET_PREVIEW_SELECTION` before jContent 3.7.0 and `CM_SET_SIDE_PANEL_SELECTION` from 3.7.0.
 - A new tab that the Locate link opens shows the folder or the page of the node. A jContent URL holds no selection, so the tab does not select the node.
 - The module bundles moonstone 2.21.0 with the scoped stylesheet of moonstone. The build adds the prefix `sitehis` to each hashed class name, such as `sitehis_moonstone-TableRow_cb6f0ca`. The rules of the bundle then match the elements of this module only. The moonstone tokens on `:root` apply while Site history is open, and the build drops any moonstone selector without a prefixed class.
