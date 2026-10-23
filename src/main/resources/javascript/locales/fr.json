@@ -3,6 +3,7 @@
   "siteHistory": {
     "nav": "Historique du site",
     "title": "Historique du site : {{siteName}}",
+    "refresh": "Actualiser",
     "columns": {
       "date": "Date",
       "user": "Utilisateur",

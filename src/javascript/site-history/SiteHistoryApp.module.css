@@ -109,13 +109,10 @@
   gap: var(--moon-spacing-small);
 }
 
-.clearFilters {
-  margin-left: auto;
-}
-
 /* A flex box drops the line box of an inline span, so the button sits in the middle of the filter row. */
 .columnChoice {
   display: flex;
+  margin-left: auto;
 }
 
 .columnChoiceFooter {

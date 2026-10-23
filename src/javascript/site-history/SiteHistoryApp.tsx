@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import { i18n, NAMESPACE } from "../i18n.ts";
 import { MOONSTONE_SCOPE_ATTRIBUTE } from "../moonstoneScope.ts";
+import { ActionBar } from "./ActionBar.tsx";
 import { buildColumns, toRow, type HistoryTableRow } from "./columns.tsx";
 import { columnIncludes, isColumnVisible, readColumnVisibility, writeColumnVisibility } from "./columnVisibility.ts";
 import { toHistoryFilter, withColumnFilter } from "./filters.ts";
@@ -87,7 +88,7 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
     }
   };
 
-  const { data, previousData, loading, error } = useQuery<SiteHistoryData, SiteHistoryVariables>(SITE_HISTORY_QUERY, {
+  const { data, previousData, loading, error, refetch } = useQuery<SiteHistoryData, SiteHistoryVariables>(SITE_HISTORY_QUERY, {
     variables: {
       path: sitePath,
       uiLanguage,
@@ -98,9 +99,16 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
       ...columnIncludes(columnVisibility),
     },
     fetchPolicy: "network-only",
+    // Without it, loading stays false during a refetch and the table shows no loader.
+    notifyOnNetworkStatusChange: true,
     client: globalThis.jahia?.apolloClient,
     skip: !siteKey,
   });
+
+  // The error of a refetch reaches the page through useQuery, so its rejected promise carries nothing more.
+  const refresh = () => {
+    refetch().catch(() => undefined);
+  };
 
   const shown = data ?? (loading ? previousData : undefined);
   const site = shown?.jcr?.nodeByPath;
@@ -121,12 +129,14 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
     [entries, uiLanguage],
   );
 
-  const isPastLastPage = !loading && !error && shown !== undefined && rows.length === 0 && currentPage > 1;
+  // A refresh can return fewer rows than the page on screen needs, so the table moves to the last page.
+  const lastPage = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  const isPastLastPage = !loading && !error && shown !== undefined && rows.length === 0 && currentPage > lastPage;
   useEffect(() => {
     if (isPastLastPage) {
-      setCurrentPage(1);
+      setCurrentPage(lastPage);
     }
-  }, [isPastLastPage]);
+  }, [isPastLastPage, lastPage]);
 
   const siteName = site?.displayName || siteKey;
 
@@ -187,7 +197,7 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
         />
             </Paper>
             {loading && (
-            <div className={styles.overlay}>
+            <div className={styles.overlay} data-sel-role="site-history-loader">
                 <Loader size="big"/>
             </div>
         )}
@@ -201,7 +211,19 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
       className={styles.layout}
       isLoading={isFirstLoad}
       data-sel-role="site-history"
-      header={<Header title={t("siteHistory.title", { siteName })}/>}
+      header={
+          <Header
+          title={t("siteHistory.title", { siteName })}
+          toolbarLeft={
+              <ActionBar
+              isLoading={loading}
+              isFiltered={columnFilters.length > 0}
+              onRefresh={refresh}
+              onClearFilters={clearFilters}
+            />
+          }
+        />
+      }
       >
           <HistoryFilters
           columns={choosableColumns}
@@ -214,7 +236,6 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
           locale={uiLanguage}
           onChange={setFilter}
           onPickUsers={setPickedUsers}
-          onClear={clearFilters}
           onColumnVisibilityChange={changeColumnVisibility}
         />
           {content}

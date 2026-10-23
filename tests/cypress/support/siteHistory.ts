@@ -197,11 +197,11 @@ export const waitForAction = (path: string, uuids: string[], action: string): Cy
         `The history of ${path} has no "${action}" row for each of ${uuids.length} nodes`
     );
 
-export const waitForStableTotal = (path: string): Cypress.Chainable<number> => {
+export const waitForStableTotal = (path: string, filter?: HistoryFilter): Cypress.Chainable<number> => {
     let previous = -1;
     return cy.waitUntil(
         () =>
-            historyTotal(path).then(total => {
+            historyTotal(path, filter).then(total => {
                 const isStable = total > 0 && total === previous;
                 previous = total;
                 return isStable ? total : 0;

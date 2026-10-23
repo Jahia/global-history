@@ -28,7 +28,7 @@ const USER_FILTER = '[data-sel-role="filter-user"]';
 const USER_PICKER_BUTTON = '[data-sel-role="filter-user-picker"]';
 const CLEAR_FILTERS = '[data-sel-role="filter-clear"]';
 const COLUMN_CHOICE = '[data-sel-role="column-choice"]';
-const FILTER_CONTROLS = [DATE_FROM, DATE_TO, USER_FILTER, PATH_FILTER, ACTION_FILTER, CLEAR_FILTERS, COLUMN_CHOICE];
+const FILTER_CONTROLS = [DATE_FROM, DATE_TO, USER_FILTER, PATH_FILTER, ACTION_FILTER, COLUMN_CHOICE];
 const PICKER = '[data-sel-role="picker-dialog"][data-sel-type="user"]';
 const EDITORIAL_PICKER = '[data-sel-role="picker-dialog"][data-sel-type="editorial"]';
 const CONTENT_FOLDERS_ACCORDION =
@@ -144,7 +144,7 @@ describe('Site history filters', () => {
         cy.get(CLEAR_FILTERS).should('be.disabled');
     });
 
-    it('shows the six controls and the column choice in one row between the header and the table', () => {
+    it('shows the five controls and the column choice in one row between the header and the table', () => {
         cy.get(`${PAGE} header`).find(FILTER_CONTROLS.join(', ')).should('not.exist');
         cy.get(FILTERS).should($filters => {
             const filters = boxOf($filters[0]);
