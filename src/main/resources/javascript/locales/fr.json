@@ -1,5 +1,5 @@
 {
-  "label": "Global History",
+  "label": "Site History",
   "siteHistory": {
     "nav": "Historique du site",
     "title": "Historique du site : {{siteName}}",

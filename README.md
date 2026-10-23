@@ -1,6 +1,6 @@
-# Global History
+# Site History
 
-Global History is a Jahia module that lists the content history of a whole site in one paginated table in jContent.
+Site History is a Jahia module that lists the content history of a whole site in one paginated table in jContent.
 
 The jContent History tab shows the history of one node. This module reads the same core table, `jahia_contenthistory`, and shows every row whose path is the site path or a path below it. The module stores no data of its own.
 
@@ -24,11 +24,11 @@ A user needs two permissions on the site node, `/sites/<siteKey>`:
 | Permission | What it controls |
 |---|---|
 | `additionalAccordionAccess` | jContent shows the Additional accordion. |
-| `viewGlobalHistory` | jContent shows the Site history entry, and the GraphQL field returns the rows. |
+| `viewSiteHistory` | jContent shows the Site history entry, and the GraphQL field returns the rows. |
 
-The GraphQL field checks `viewGlobalHistory` on the node it is called on. A user without the permission gets an access-denied error and no rows.
+The GraphQL field checks `viewSiteHistory` on the node it is called on. A user without the permission gets an access-denied error and no rows.
 
-The module adds the permission `viewGlobalHistory` under the `site-admin` permission group. The `site-administrator` role holds `site-admin`, and the module grants `viewGlobalHistory` to the `server-administrator` role. The jContent History tab of a node keeps its own permission, `viewHistoryTab`, so a user with `viewHistoryTab` alone does not see the Site history.
+The module adds the permission `viewSiteHistory` under the `site-admin` permission group. The `site-administrator` role holds `site-admin`, and the module grants `viewSiteHistory` to the `server-administrator` role. The jContent History tab of a node keeps its own permission, `viewHistoryTab`, so a user with `viewHistoryTab` alone does not see the Site history.
 
 ## Columns
 
@@ -36,7 +36,7 @@ The table has 10 columns and shows the newest row first. A page shows 100 rows, 
 
 You can sort the table by the Date, User, Property, Action, Path, UUID or Message column. A click on the title of the column sorts the rows, and a second click reverses the order. The table returns to page 1 when the sort changes, and rows with an equal value show the newest row first. The User column sorts by user name, and the Property column sorts by property name. These names can differ from the text in the cell. The table returns to the newest row first after a reload, and when you hide the sorted column. The pager stays at the bottom of the table while you scroll the rows, and a new page opens on its first row.
 
-The column button at the right end of the filter row lists the visible columns and the hidden columns, and a click on a column shows or hides it. The UUID and Message columns are hidden until you show them. The browser keeps the choice in its local storage under the key `globalHistory.columns`, so another browser shows the default columns. The page query skips the fields of a hidden column, so a hidden User, Name or Property column saves a lookup per row.
+The column button at the right end of the filter row lists the visible columns and the hidden columns, and a click on a column shows or hides it. The UUID and Message columns are hidden until you show them. The browser keeps the choice in its local storage under the key `siteHistory.columns`, so another browser shows the default columns. The page query skips the fields of a hidden column, so a hidden User, Name or Property column saves a lookup per row.
 
 | Column | Content |
 |---|---|
@@ -53,13 +53,13 @@ The column button at the right end of the filter row lists the visible columns a
 
 ## GraphQL API
 
-The module adds the field `globalHistory` to the `JCRNode` type. The field returns the rows of the node and of every node below it:
+The module adds the field `siteHistory` to the `JCRNode` type. The field returns the rows of the node and of every node below it:
 
 ```graphql
 query {
     jcr {
         nodeByPath(path: "/sites/digitall") {
-            globalHistory {
+            siteHistory {
                 totalCount
                 entries(offset: 0, limit: 20) {
                     date
@@ -81,7 +81,7 @@ query {
 - `totalCount` is an exact count of the rows.
 - Each SQL query has a timeout of 30 seconds.
 
-`totalCount` and `entries` take an optional `filter` argument of type `InputGlobalHistoryFilter`. A row must match every field that is set, and a null or empty field matches every row.
+`totalCount` and `entries` take an optional `filter` argument of type `InputSiteHistoryFilter`. A row must match every field that is set, and a null or empty field matches every row.
 
 | Field | Rows that match |
 |---|---|
@@ -92,10 +92,10 @@ query {
 | `path` | The path is this path or a path below it. A path outside the node returns an error. A path with `[` or `]` returns an error too. |
 
 ```graphql
-query ($filter: InputGlobalHistoryFilter) {
+query ($filter: InputSiteHistoryFilter) {
     jcr {
         nodeByPath(path: "/sites/digitall") {
-            globalHistory {
+            siteHistory {
                 totalCount(filter: $filter)
                 entries(limit: 20, filter: $filter) {
                     date
@@ -114,7 +114,7 @@ The variables of this query list the published rows of `/sites/digitall/home` si
 {"filter": {"actions": ["published"], "fromTimestamp": 1790805600000, "path": "/sites/digitall/home"}}
 ```
 
-`entries` takes an optional `sort` argument of type `InputGlobalHistorySort`. A null `sort` lists the newest rows first, and rows with an equal value come newest first in every sort.
+`entries` takes an optional `sort` argument of type `InputSiteHistorySort`. A null `sort` lists the newest rows first, and rows with an equal value come newest first in every sort.
 
 | Field | Values |
 |---|---|
@@ -130,7 +130,7 @@ These variables list the rows of the user names in alphabetical order:
 ## Limits
 
 - A moved node keeps the old path on its old rows. Those rows stay listed under the old path.
-- The module filters no row by ACL. A user with `viewGlobalHistory` on the site sees every row of the site, including the rows of a node that the user cannot read.
+- The module filters no row by ACL. A user with `viewSiteHistory` on the site sees every row of the site, including the rows of a node that the user cannot read.
 - The table includes the `accessed` rows. Jahia writes one `accessed` row on each read of a file, and guest reads count too.
 - Jahia 8.2.4.0 deletes the rows that are older than 13 months. On Jahia 8.2.3, a purge in December keeps 1 year of rows.
 - Jahia does not log the actions of the user `system`. A script that runs as `system`, such as a Groovy script, leaves no row.
@@ -147,7 +147,7 @@ These variables list the rows of the user names in alphabetical order:
 - The User filter calls `window.CE_API.openPicker`, which jContent sets and the Jahia Academy does not document. The page hides the User filter when jContent does not set this function.
 - The Locate link reads entries of the jContent registry that the Jahia Academy does not document: the `accordionItem` entries, `jcontent/utils` and the redux action `jcontentGoto`. It selects the node with the redux actions `CM_SET_PREVIEW_SELECTION` before jContent 3.7.0 and `CM_SET_SIDE_PANEL_SELECTION` from 3.7.0.
 - A new tab that the Locate link opens shows the folder or the page of the node. A jContent URL holds no selection, so the tab does not select the node.
-- The module bundles moonstone 2.21.0 with the scoped stylesheet of moonstone. The build adds the prefix `globhis` to each hashed class name, such as `globhis_moonstone-TableRow_cb6f0ca`. The rules of the bundle then match the elements of this module only. The moonstone tokens on `:root` apply while Site history is open, and the build drops any moonstone selector without a prefixed class.
+- The module bundles moonstone 2.21.0 with the scoped stylesheet of moonstone. The build adds the prefix `sitehis` to each hashed class name, such as `sitehis_moonstone-TableRow_cb6f0ca`. The rules of the bundle then match the elements of this module only. The moonstone tokens on `:root` apply while Site history is open, and the build drops any moonstone selector without a prefixed class.
 - The page of the module asks for `totalCount` and `entries` in one request. On a site with few rows, or with a filter that matches no row, this request took up to 7.3 seconds.
 
 The table gives the worst time of one GraphQL request with 2,000,000 rows on MariaDB and Jahia 8.2.4. The rows have 5 actions, 10 folders and 200 users, and the date filter covers 24 hours.
@@ -191,7 +191,7 @@ export NEXUS_PASSWORD=<your Nexus password>
 mvn -s .github/maven.settings.xml clean install
 ```
 
-The build runs Vite and writes the bundle to `target/global-history-<version>.jar`. If your own `~/.m2/settings.xml` already resolves the Jahia repositories, `mvn clean install` is enough.
+The build runs Vite and writes the bundle to `target/site-history-<version>.jar`. If your own `~/.m2/settings.xml` already resolves the Jahia repositories, `mvn clean install` is enough.
 
 To check the frontend code without a full build, run these commands:
 
@@ -214,7 +214,7 @@ yarn tsc --noEmit
 ## Tests
 
 - `mvn clean install` runs one JUnit 5 class, `HistorySqlTest`. The class checks the SQL text of each vendor and the escaped LIKE patterns of a site path.
-- `tests/` holds the Cypress suite. The suite creates the sites `gh_1`, `ghx1` and `gh_10`, and it checks the scope, the pagination, the permission and the page.
+- `tests/` holds the Cypress suite. The suite creates the sites `sh_1`, `shx1` and `sh_10`, and it checks the scope, the pagination, the permission and the page.
 
 To run the Cypress suite against a running Jahia, run these commands:
 

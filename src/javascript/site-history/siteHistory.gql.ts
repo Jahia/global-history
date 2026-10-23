@@ -31,7 +31,7 @@ export type SiteHistoryData = {
       uuid: string;
       workspace: string;
       displayName: string | null;
-      globalHistory: {
+      siteHistory: {
         totalCount: number;
         entries: (HistoryEntry | null)[] | null;
       } | null;
@@ -76,13 +76,13 @@ export type SiteHistoryVariables = ColumnIncludes & {
 };
 
 export const SITE_HISTORY_QUERY = gql`
-  query globalHistorySiteHistory(
+  query siteHistoryTable(
     $path: String!
     $uiLanguage: String!
     $offset: Int!
     $limit: Int!
-    $filter: InputGlobalHistoryFilter
-    $sort: InputGlobalHistorySort
+    $filter: InputSiteHistoryFilter
+    $sort: InputSiteHistorySort
     $showDate: Boolean!
     $showUser: Boolean!
     $showName: Boolean!
@@ -98,7 +98,7 @@ export const SITE_HISTORY_QUERY = gql`
         uuid
         workspace
         displayName(language: $uiLanguage)
-        globalHistory {
+        siteHistory {
           totalCount(filter: $filter)
           entries(offset: $offset, limit: $limit, filter: $filter, sort: $sort) {
             id

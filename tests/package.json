@@ -1,7 +1,7 @@
 {
-    "name": "@jahia/global-history-cypress",
+    "name": "@jahia/site-history-cypress",
     "version": "1.0.0",
-    "description": "Cypress tests for the global-history module",
+    "description": "Cypress tests for the site-history module",
     "private": true,
     "devDependencies": {
         "@apollo/client": "^3.11.7",

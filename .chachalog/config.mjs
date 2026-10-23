@@ -9,7 +9,7 @@ export default defineConfig(() => ({
 	platform: github(),
 	managers: {
 		packages: {
-			name: "global-history",
+			name: "site-history",
 			path: process.cwd(),
 			version: fs.readFileSync(".chachalog/.version", "utf-8").trim(),
 		},

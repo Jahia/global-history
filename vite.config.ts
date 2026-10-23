@@ -10,7 +10,7 @@ const MOONSTONE_GLOBAL_CSS = /\/@jahia\/moonstone\/dist\/legacy-global-bundle\.c
 const MOONSTONE_JS = /\/@jahia\/moonstone\/dist\/.*\.js$/;
 // A class or keyframes name of the scoped stylesheet, such as _moonstone-TableRow_cb6f0ca.
 const HASHED_NAME = /(?<![\w-])_[A-Za-z][\w-]*_[0-9a-f]{7}(?![\w-])/g;
-const PREFIX = "globhis";
+const PREFIX = "sitehis";
 
 const isInKeyframes = (rule: Rule): boolean =>
   rule.parent?.type === "atrule" && /keyframes$/.test((rule.parent as { name: string }).name);
@@ -18,14 +18,14 @@ const isInKeyframes = (rule: Rule): boolean =>
 // The entry of moonstone imports its global stylesheet, whose rules match every moonstone element of the page.
 // The scoped stylesheet hashes its names, but an app shell with the same moonstone carries the same hashes,
 // so a rule of this bundle would still reach the elements of jContent. The plugin gives the bundle the scoped
-// stylesheet, and it prefixes each hashed name with globhis in the stylesheet and in the class maps of moonstone.
+// stylesheet, and it prefixes each hashed name with sitehis in the stylesheet and in the class maps of moonstone.
 // The tokens on :root apply while Site history is open, and the page sets the attribute then.
 // A selector with no prefixed class would reach other pages, so the plugin drops it and warns.
 const moonstoneScopedCss = (): Plugin => {
   const scopedCss = readFileSync(MOONSTONE_SCOPED_CSS, "utf8");
   const hashedNames = new Set(scopedCss.match(HASHED_NAME));
   return {
-    name: "global-history:moonstone-scoped-css",
+    name: "site-history:moonstone-scoped-css",
     enforce: "pre",
     load(id) {
       if (!MOONSTONE_GLOBAL_CSS.test(id.split("?")[0])) {

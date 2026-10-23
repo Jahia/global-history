@@ -3,7 +3,7 @@ import { registry } from "@jahia/ui-extender";
 
 // The ancestors that the trees of jContent open, as in GetAncestorsQueryById of jContent.
 export const LOCATE_QUERY = gql`
-  query globalHistoryLocate($uuid: String!) {
+  query siteHistoryLocate($uuid: String!) {
     jcr {
       nodeById(uuid: $uuid) {
         uuid

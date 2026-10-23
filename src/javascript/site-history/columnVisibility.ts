@@ -1,7 +1,7 @@
 import type { VisibilityState } from "@tanstack/react-table";
 import type { ColumnIncludes } from "./siteHistory.gql.ts";
 
-const STORAGE_KEY = "globalHistory.columns";
+const STORAGE_KEY = "siteHistory.columns";
 
 // TanStack reads a column that is missing from the state as visible.
 export const DEFAULT_COLUMN_VISIBILITY: VisibilityState = { uuid: false, message: false };

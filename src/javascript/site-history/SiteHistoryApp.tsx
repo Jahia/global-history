@@ -104,8 +104,8 @@ const SiteHistory = ({ siteKey, language }: SiteHistoryProps) => {
 
   const shown = data ?? (loading ? previousData : undefined);
   const site = shown?.jcr?.nodeByPath;
-  const totalItems = site?.globalHistory?.totalCount ?? previousData?.jcr?.nodeByPath?.globalHistory?.totalCount ?? 0;
-  const entries = site?.globalHistory?.entries;
+  const totalItems = site?.siteHistory?.totalCount ?? previousData?.jcr?.nodeByPath?.siteHistory?.totalCount ?? 0;
+  const entries = site?.siteHistory?.entries;
 
   const columns = useMemo(() => buildColumns(t, language), [t, language]);
   const choosableColumns = useMemo(

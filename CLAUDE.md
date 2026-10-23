@@ -6,7 +6,7 @@
 yarn install                  # Frontend dependencies
 yarn lint                     # ESLint
 yarn tsc --noEmit             # Type check of src/javascript
-mvn -s .github/maven.settings.xml clean install   # Vite build, JUnit 5 tests, target/global-history-*.jar
+mvn -s .github/maven.settings.xml clean install   # Vite build, JUnit 5 tests, target/site-history-*.jar
 ```
 
 The Maven settings file reads `NEXUS_USERNAME` and `NEXUS_PASSWORD` from the environment. The file `mise.toml` pins Java temurin-17, Node 22, Yarn 4.13.0 and Maven 3.
@@ -30,4 +30,4 @@ cd tests && JAHIA_URL=http://localhost:8080 SUPER_USER_PASSWORD=<root password> 
 cd tests && yarn e2e:debug    # Interactive Cypress runner
 ```
 
-The suite runs its specs in the order of `specPattern` in `tests/cypress.config.ts`. `globalHistory0Setup.cy.ts` creates the sites `gh_1`, `ghx1` and `gh_10`, and `globalHistoryZTeardown.cy.ts` deletes them. Run a single spec together with these two specs.
+The suite runs its specs in the order of `specPattern` in `tests/cypress.config.ts`. `siteHistory0Setup.cy.ts` creates the sites `sh_1`, `shx1` and `sh_10`, and `siteHistoryZTeardown.cy.ts` deletes them. Run a single spec together with these two specs.
