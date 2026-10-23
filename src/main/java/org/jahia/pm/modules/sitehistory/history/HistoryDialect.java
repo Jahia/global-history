@@ -39,6 +39,9 @@ public enum HistoryDialect {
     }
 
     private static final String TABLE = "jahia_contenthistory";
+    // NOT IN alone drops the rows without a property, such as the published rows.
+    private static final String SHOWN_PROPERTY_CONDITION =
+            "(property_name IS NULL OR property_name NOT IN ('j:lastPublished', 'j:lastPublishedBy'))";
 
     private final String pathExpression;
     private final String pathSortExpression;
@@ -117,6 +120,7 @@ public enum HistoryDialect {
         List<String> conditions = new ArrayList<>();
         List<Object> parameters = new ArrayList<>(HistoryPaths.likePatterns(filter.getPath()));
         conditions.add(pathCondition());
+        conditions.add(SHOWN_PROPERTY_CONDITION);
         if (!filter.getActions().isEmpty()) {
             conditions.add(inCondition("entry_action", filter.getActions().size()));
             parameters.addAll(filter.getActions());

@@ -22,6 +22,8 @@ class HistorySqlTest {
     private static final List<Object> OFFSET_THEN_LIMIT = asList(40, 20);
     private static final String SCOPE = "/sites/sh_1";
     private static final List<Object> SCOPE_PATTERNS = asList("/sites/sh!_1", "/sites/sh!_1/%");
+    private static final String SHOWN_PROPERTY =
+            "(property_name IS NULL OR property_name NOT IN ('j:lastPublished', 'j:lastPublishedBy'))";
 
     static Stream<Arguments> dialects() {
         return Stream.of(
@@ -38,7 +40,7 @@ class HistorySqlTest {
             List<Object> paginationParameters) {
         HistoryFilter noFilter = HistoryFilter.of(SCOPE, null, null, null, null, null);
         String condition = path + " " + like + " ? ESCAPE '!'";
-        String where = " WHERE (" + condition + " OR " + condition + ")";
+        String where = " WHERE (" + condition + " OR " + condition + ") AND " + SHOWN_PROPERTY;
 
         HistorySql count = dialect.countSql(noFilter);
         assertEquals("SELECT COUNT(*) FROM jahia_contenthistory" + where, count.getText());
@@ -138,7 +140,7 @@ class HistorySqlTest {
     private static void assertUserCondition(List<String> userKeys, String condition, List<String> boundKeys) {
         HistorySql where = userWhere(userKeys);
         String pathCondition = "entry_path LIKE ? ESCAPE '!'";
-        assertEquals("(" + pathCondition + " OR " + pathCondition + ") AND " + condition, where.getText());
+        assertEquals("(" + pathCondition + " OR " + pathCondition + ") AND " + SHOWN_PROPERTY + " AND " + condition, where.getText());
         List<Object> parameters = new ArrayList<>(SCOPE_PATTERNS);
         parameters.addAll(boundKeys);
         assertEquals(parameters, where.getParameters());
