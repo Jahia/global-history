@@ -159,14 +159,14 @@ const columnDefinitions = (t: Translate, language: string): HistoryColumn[] => [
   {
     key: "contentType",
     label: t("siteHistory.columns.contentType"),
-    width: "160px",
+    width: "140px",
     render: ({ data }) => (data.contentType ? withTypeIcon(data.contentType, data.contentTypeName, data.contentTypeIcon) : ""),
   },
   {
     key: "property",
     isSortable: true,
     label: t("siteHistory.columns.property"),
-    width: "200px",
+    width: "140px",
     render: ({ data }) => (data.propertyName ? withTechnicalName(data.property, data.propertyName) : ""),
   },
   {
