@@ -51,9 +51,10 @@ const dayFromToday = (days: number): Date => {
     return new Date(now.getFullYear(), now.getMonth(), now.getDate() + days);
 };
 
-const selectAction = (label: string) => {
+// A click on a selected tag removes its action, so the menu opens once for all the labels.
+const selectActions = (...labels: string[]) => {
     cy.get(`${ACTION_FILTER} [role="listbox"]`).click();
-    cy.contains(`${ACTION_FILTER} menu [role="option"]`, new RegExp(`^${label}$`)).click();
+    labels.forEach(label => cy.contains(`${ACTION_FILTER} menu [role="option"]`, new RegExp(`^${label}$`)).click());
     // A Dropdown with several values keeps its menu open, and a click on its overlay closes it.
     cy.get(`${ACTION_FILTER} .moonstone-menu_overlay`).click();
 };
@@ -128,7 +129,7 @@ describe('Site history filters', () => {
     });
 
     it('lists the rows of the selected action', () => {
-        selectAction('Published');
+        selectActions('Published');
         cy.get(TOTAL_ITEMS, {timeout: LOAD_TIMEOUT}).should($total => {
             expect(totalOf($total.text()), 'total of the published rows').to.be.above(0).and.below(total);
         });
@@ -136,6 +137,17 @@ describe('Site history filters', () => {
             const actions = textsOf($cells);
             expect(actions, 'Action cells').not.to.be.empty;
             expect(Cypress._.uniq(actions), 'Action cells').to.deep.equal(['Published']);
+        });
+    });
+
+    it('keeps the action filter at the size of an empty filter with three actions selected', () => {
+        selectActions('Published', 'Added', 'Created');
+        cy.get(`${ACTION_FILTER} .moonstone-tag`).should('have.length', 3);
+        cy.get(FILTERS).should($filters => {
+            const action = boxOf($filters.find(ACTION_FILTER)[0]);
+            const user = boxOf($filters.find(USER_FILTER)[0]);
+            expect(action.width, 'width of the action filter').to.be.closeTo(160, 0.5);
+            expect(action.height, 'height of the action filter').to.be.closeTo(user.height, 0.5);
         });
     });
 
@@ -147,7 +159,7 @@ describe('Site history filters', () => {
             cy.get(TOTAL_ITEMS)
                 .invoke('text')
                 .should('match', new RegExp(`^${PAGE_SIZE + 1}-`));
-            selectAction('Added');
+            selectActions('Added');
             cy.get(TOTAL_ITEMS, {timeout: LOAD_TIMEOUT})
                 .invoke('text')
                 .should('match', new RegExp(`^1-${PAGE_SIZE} of ${addedTotal}$`));
@@ -280,7 +292,7 @@ describe('Site history filters', () => {
 
     it('clears every filter', () => {
         cy.get(PATH_FILTER).type(`${TEXT_1_PATH}{enter}`);
-        selectAction('Published');
+        selectActions('Published');
         typeDate(DATE_TO, dayFromToday(0));
         typeDate(DATE_FROM, dayFromToday(-30));
         cy.get(TOTAL_ITEMS, {timeout: LOAD_TIMEOUT}).should($total => {
