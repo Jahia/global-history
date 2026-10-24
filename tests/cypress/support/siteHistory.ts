@@ -9,7 +9,8 @@ export const TEMPLATE_SET = 'templates-system';
 
 export const CONTENT_FOLDER = 'sh-content';
 export const CONTENT_FOLDER_PATH = `${SITE_PATH}/contents/${CONTENT_FOLDER}`;
-export const TEXT_COUNT = 12;
+// Each text node writes one "added" row, and the page specs need more than 100 "added" rows on sh_1.
+export const TEXT_COUNT = 120;
 export const TEXT_1_PATH = `${CONTENT_FOLDER_PATH}/text-1`;
 export const AUTHOR_FOLDER = 'sh-author-content';
 export const AUTHOR_FOLDER_PATH = `${SITE_PATH}/contents/${AUTHOR_FOLDER}`;
