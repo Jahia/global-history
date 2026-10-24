@@ -1,5 +1,31 @@
 # site-history Changelog
 
+## 0.2.0
+
+### New Features
+
+* Added a sort to the Site history table, by the Date, User, Property, Action, Path, UUID or Message column. A click on the title of a column sorts the rows, and a second click reverses the order.
+
+  The GraphQL field `entries` takes a `sort` argument with a `field` and a `direction`.
+
+* The Path filter and the User filter of the Site history page each have a text field with a picker icon at its right end. The icon of the Path filter opens the editorial picker of jContent, and the picked node sets the path. The User filter takes user names separated by commas, such as `root, jdoe`, and its icon adds the users picked in the user picker of jContent.
+
+* Added an action bar under the title of the Site history page. Its Refresh button loads the rows again with the same page, sort and filters, and the Clear filters button moved there from the filter row.
+
+* Added a Content type column to the Site history table. The column shows the label of the primary type of the node in the UI language, and its icon. A row of a translation node shows the type of its content node, and the cell is empty when the node no longer exists.
+
+  The GraphQL type `SiteHistoryEntry` has a field `primaryNodeType` of type `JCRNodeType`.
+
+* The Site history hides the rows of the properties `j:lastPublished` and `j:lastPublishedBy`. A publication writes a row of each property for each published node, and the `published` row of the node stays listed.
+
+* Added the permission `viewSiteHistory` for the Site history page. The `site-administrator` and `server-administrator` roles hold it by default.
+
+  A user who holds only `viewHistoryTab`, the permission of the History tab of a node, does not see the Site history page. To give another role access, grant it `viewSiteHistory`.
+
+### Bug Fixes
+
+* The Action filter of the Site history page keeps its width and height when a user selects several actions. The selected actions stay on one line, and the filter hides the ones that do not fit.
+
 ## 0.1.0
 
 * Improved the Site history page: the filters sit in their own row, dates show in full, and long paths open on their end.
