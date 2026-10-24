@@ -30,6 +30,24 @@ import {
 
 type AddNodeResult = {data?: {jcr?: {addNode?: {uuid: string; addChildrenBatch?: {uuid: string}[]}}}};
 
+// Each text node writes one "added" row, and the page specs need more than 100 "added" rows on sh_1.
+// One request per folder of TEXT_COUNT text nodes keeps each request short.
+const BULK_FOLDERS = Array.from({length: 9}, (_, index) => `sh-bulk-${index + 1}`);
+
+const addTextFolder = (name: string) =>
+    addNode({
+        parentPathOrId: `${SITE_PATH}/contents`,
+        name,
+        primaryNodeType: 'jnt:contentFolder',
+        children: textNodes(TEXT_COUNT)
+    }).then((result: AddNodeResult) => {
+        const folder = result.data?.jcr?.addNode;
+        expect(folder?.addChildrenBatch, `text nodes created under ${name}`).to.have.length(TEXT_COUNT);
+        const uuids = [folder.uuid, ...folder.addChildrenBatch.map(child => child.uuid)];
+
+        waitForAction(`${SITE_PATH}/contents/${name}`, uuids, 'created');
+    });
+
 describe('Site history test suite setup', () => {
     before(() => {
         ALL_SITE_KEYS.forEach(siteKey => deleteSite(siteKey));
@@ -45,19 +63,8 @@ describe('Site history test suite setup', () => {
     });
 
     it('creates and publishes the content of sh_1 as root', () => {
-        addNode({
-            parentPathOrId: `${SITE_PATH}/contents`,
-            name: CONTENT_FOLDER,
-            primaryNodeType: 'jnt:contentFolder',
-            children: textNodes(TEXT_COUNT)
-        }).then((result: AddNodeResult) => {
-            const folder = result.data?.jcr?.addNode;
-            expect(folder?.addChildrenBatch, 'text nodes created under the folder').to.have.length(TEXT_COUNT);
-            const uuids = [folder.uuid, ...folder.addChildrenBatch.map(child => child.uuid)];
-
-            waitForAction(CONTENT_FOLDER_PATH, uuids, 'created');
-            publishAndWaitJobEnding(SITE_PATH, ['en']);
-        });
+        [CONTENT_FOLDER, ...BULK_FOLDERS].forEach(addTextFolder);
+        publishAndWaitJobEnding(SITE_PATH, ['en']);
     });
 
     // The first publication of a whole site writes a "published" row for the site node only.
