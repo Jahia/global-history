@@ -190,7 +190,7 @@ describe('Site history filters', () => {
         });
     });
 
-    // A fresh sh_1 has one "added" row for each of its 120 text nodes, more than one page.
+    // A fresh sh_1 has one "added" row for each of its 122 text nodes, more than one page.
     it('returns to page 1 when a filter changes', () => {
         historyTotal(SITE_PATH, {actions: ['added']}).then(addedTotal => {
             expect(addedTotal, 'added rows, more than one page').to.be.above(PAGE_SIZE);
